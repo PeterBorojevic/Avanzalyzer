@@ -1,8 +1,9 @@
 ﻿using System.Globalization;
-using Application.Interfaces;
+using Core.Common.Interfaces;
 using Core.Models;
+using Core.Models.Securities.Base;
 
-namespace Application.Features;
+namespace Infrastructure.Repositories;
 
 public class PortfolioManager
 {
@@ -46,7 +47,7 @@ public class PortfolioManager
             }
         }
 
-        return new Portfolio();
+        return new Portfolio(new List<Asset>());
     }
 
 }

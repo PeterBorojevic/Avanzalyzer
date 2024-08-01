@@ -290,21 +290,22 @@ public class ConsoleTable
         // Attempt 2
         var columnLengths = ColumnLengths();
         var columnAlignment = Enumerable.Range(0, Columns.Count).Select(GetNumberAlignment).ToList();
-        // TODO Add support for separate colors for each column/row
-        // TODO Add value based coloring, eg. Func<value, ConsoleColor>
+        //  TODO  Add support for separate colors for each column/row
+        // (Done) Add value based coloring, eg. Func<value, ConsoleColor> 
         var columnColors = Options.ColumnColors.ToArray();
+        var rowIndex = 0;
         foreach (var row in Rows) // here allLines == Rows
         {
             ExtendedConsole.WriteLine($"{dividerPlus}");
-            foreach (var col in row.Select((x, i) => new { Value = x, Index = i }))
+            foreach (var col in row.Select((x, i) => new Col(Value: x?.ToString(), Index: i, RowIndex: rowIndex)))
             {
                 var value = col.Value?.ToString() ?? "";
-                var length = columnLengths[col.Index] - (GetTextWidth(value) - value.Length);
+                var length = columnLengths[col.Index] - (GetTextWidth(col.Value) - col.Value.Length);
                 // columnAlignment[col.Index] is either "" or "-"
                 // 0 used to be col.Index, but now frozen as we format the string each time
                 var t = "{" + 0 + "," + columnAlignment[col.Index] + length + "}"; 
-                var formattedValue = string.Format(t, value);
-                switch (columnColors[col.Index](value))
+                var formattedValue = string.Format(t, col.Value);
+                switch (columnColors[col.Index](col.Value))
                 {
                     case ConsoleColor.Black:
                         ExtendedConsole.Write($"| {formattedValue:black} ");
@@ -360,6 +361,7 @@ public class ConsoleTable
                 }
             }
             ExtendedConsole.WriteLine($"|");
+            rowIndex++;
         }
         
         ExtendedConsole.WriteLine($"{dividerPlus}");

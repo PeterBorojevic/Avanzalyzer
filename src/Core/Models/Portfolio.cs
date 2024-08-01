@@ -3,48 +3,52 @@ using Core.Common.Enums;
 using Core.Models.Dtos;
 using Core.Models.Securities;
 using Core.Models.Securities.Base;
+using System.Collections.Generic;
 
 namespace Core.Models;
 
 public class Portfolio
 {
-    public Portfolio()
+    public Portfolio(List<Asset> assets)
     {
+        Assets = assets;
         Accounts = new List<Account>();
-        Positions = new List<Position>();
     }
     public Portfolio(IEnumerable<Account> accounts, List<Position> positions)
     {
         Accounts = accounts.Where(a => a.Balance != decimal.Zero).ToList();
-        Positions = positions;
+        Assets = new List<Asset>(ConvertPositionsToAssets(positions));
     }
-    public List<Account> Accounts { get; set; }
-    private List<Position> Positions { get; set; }
 
-    public IEnumerable<Asset> Get(AssetType type)
+    private IEnumerable<Asset> ConvertPositionsToAssets(List<Position> positions)
     {
-        return type switch
+        var assets = positions.Select(p =>
         {
-            AssetType.Stock => Positions.Where(p => p.Type == "STOCK").Select(p => new Stock(p)),
-            AssetType.Fund => Positions.Where(p => p.Type == "FUND").Select(p => new Fund(p)),
-            AssetType.Etf => Positions.Where(p => p.Type == "EXCHANGE_TRADED_FUND").Select(p => new ExchangeTradedFund(p)),
-            AssetType.Certificate => Positions.Where(p => p.Type == "CERTIFICATE").Select(p => new Certificate(p)),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+            return p.Type switch
+            {
+                "STOCK" => new Stock(p) as Asset,
+                "FUND" => new Fund(p),
+                "EXCHANGE_TRADED_FUND" => new ExchangeTradedFund(p),
+                "CERTIFICATE" => new Certificate(p),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        });
+
+        return assets;
+    }
+    public List<Asset> Assets { get; }
+    public List<Account> Accounts { get; set; }
+
+    public IEnumerable<Asset> Select(AssetType type)
+    {
+        return Assets.Where(a => a.Type == type);
     }
 
     //public IEnumerable<Asset> Get(Account type)
 
     public void Print(AssetType type)
     {
-        var assets = Get(type);
-        var headers = new Column[]
-        {
-            new("Name", ConsoleColor.White),
-            new("Value", ConsoleColor.Yellow),
-        };
-        var table = new ConsoleTable(headers);
-        
+       //TODO Portfolio should not be the printer. We could make an interface that contains a method for extracting printable objects
     }
     
 }

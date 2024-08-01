@@ -1,6 +1,4 @@
-﻿using Core.Models.Tables;
-
-namespace Core.Common.ConsoleTables.v2;
+﻿namespace Core.Common.ConsoleTables.v2;
 
 public class ConsoleTable
 {

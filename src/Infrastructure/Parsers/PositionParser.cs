@@ -1,14 +1,14 @@
-﻿using CsvHelper.Configuration;
+﻿using Core.Models.Dtos;
 using CsvHelper;
+using CsvHelper.Configuration;
 using System.Globalization;
-using Application.Interfaces;
-using Core.Models.Dtos;
+using Core.Common.Interfaces;
 
-namespace Application.Features.Parsers;
+namespace Infrastructure.Parsers;
 
-public class AccountParser : IAccountParser
+public class PositionParser : IPositionParser
 {
-    public List<Account> ParseAccounts(string filePath)
+    public List<Position> ParsePositions(string filePath)
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -17,7 +17,6 @@ public class AccountParser : IAccountParser
         };
         using var reader = new StreamReader(filePath);
         using var csv = new CsvReader(reader, config);
-        return csv.GetRecords<Account>().ToList();
+        return csv.GetRecords<Position>().ToList();
     }
-
 }

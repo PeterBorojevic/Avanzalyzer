@@ -1,6 +1,6 @@
 ﻿using Core.Models.Dtos;
 
-namespace Application.Interfaces;
+namespace Core.Common.Interfaces;
 
 public interface IAccountParser
 {
