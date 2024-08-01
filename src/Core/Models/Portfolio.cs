@@ -1,5 +1,8 @@
 ﻿using Core.Common.ConsoleTables.v2;
 using Core.Common.Enums;
+using Core.Models.Dtos;
+using Core.Models.Securities;
+using Core.Models.Securities.Base;
 
 namespace Core.Models;
 
@@ -16,19 +19,21 @@ public class Portfolio
         Positions = positions;
     }
     public List<Account> Accounts { get; set; }
-    public List<Position> Positions { get; set; }
+    private List<Position> Positions { get; set; }
 
-    public IEnumerable<Position> Get(AssetType type)
+    public IEnumerable<Asset> Get(AssetType type)
     {
         return type switch
         {
-            AssetType.Stock => Positions.Where(p => p.Type == "STOCK"),
-            AssetType.Fund => Positions.Where(p => p.Type == "FUND"),
-            AssetType.Etf => Positions.Where(p => p.Type == "EXCHANGE_TRADED_FUND"),
-            AssetType.Certificate => Positions.Where(p => p.Type == "CERTIFICATE"),
+            AssetType.Stock => Positions.Where(p => p.Type == "STOCK").Select(p => new Stock(p)),
+            AssetType.Fund => Positions.Where(p => p.Type == "FUND").Select(p => new Fund(p)),
+            AssetType.Etf => Positions.Where(p => p.Type == "EXCHANGE_TRADED_FUND").Select(p => new ExchangeTradedFund(p)),
+            AssetType.Certificate => Positions.Where(p => p.Type == "CERTIFICATE").Select(p => new Certificate(p)),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
+
+    //public IEnumerable<Asset> Get(Account type)
 
     public void Print(AssetType type)
     {

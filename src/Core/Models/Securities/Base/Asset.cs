@@ -1,10 +1,24 @@
 ﻿using Core.Common.Converters;
+using Core.Common.Enums;
+using Core.Models.Dtos;
 using CsvHelper.Configuration.Attributes;
 
-namespace Core.Models;
+namespace Core.Models.Securities.Base;
 
-public class Position
+public abstract class Asset
 {
+    protected Asset(Position position, AssetType assetType)
+    {
+        AccountNumber = position.AccountNumber;
+        Name = position.Name;
+        Quantity = position.Quantity;
+        MarketValue = position.MarketValue;
+        AvgAcquisitionCost = position.AvgAcquisitionCost;
+        ISIN = position.ISIN;
+        Currency = position.Currency;
+        Type = assetType;
+    }
+
     /// <summary>
     /// Kontonummer
     /// </summary>
@@ -44,14 +58,15 @@ public class Position
     public string Currency { get; set; }
 
     /// <summary>
-    /// Typ (FUND, STOCK, EXCHANGE_TRADED_FUND, CERTIFICATE)
+    /// Typ av värdepapper
     /// </summary>
     [Name("Typ")]
-    public string Type { get; set; }
+    public AssetType Type { get; set; }
 
     // Calculated properties
 
-    [Ignore] public decimal AcquisitionCost => AvgAcquisitionCost * Quantity;
-    [Ignore] public decimal ProfitOrLoss => MarketValue - AcquisitionCost;
-    [Ignore] public decimal PercentageChange => decimal.Divide(MarketValue, AcquisitionCost) - 1;
+    public decimal AcquisitionCost => AvgAcquisitionCost * Quantity;
+    public decimal ProfitOrLoss => MarketValue - AcquisitionCost;
+    public decimal PercentageChange => decimal.Divide(MarketValue, AcquisitionCost) - 1;
+    public decimal AssetValue => decimal.Divide(MarketValue, Quantity);
 }

@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
-using Core.Models;
 using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
+using Core.Models.Dtos;
 
 namespace Application.Features.Parsers;
 

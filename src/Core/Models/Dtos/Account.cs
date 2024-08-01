@@ -1,6 +1,6 @@
 ﻿using CsvHelper.Configuration.Attributes;
 
-namespace Core.Models;
+namespace Core.Models.Dtos;
 
 public class Account
 {

@@ -1,33 +1,49 @@
 ﻿using Core.Common.ConsoleTables;
 using Core.Common.ConsoleTables.v1;
-using Core.Models;
+using Core.Models.Dtos;
+using Core.Models.Securities.Base;
 
 namespace Core.Extensions;
 
-public static class PositionExtensions
+public static class AssetExtensions
 {
 
-    public static void PrintProfitOrLoss(this IEnumerable<Position> positions)
+    public static void PrintProfitOrLoss(this IEnumerable<Asset> assets)
     {
+        // Header and color setup TODO refactor
+        var columnInColors = new List<ColumnInColor>()
+        {
+            new("Namn"),
+            new("Värde", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
+                .And(ColorFunctions.ValuesBelow(1001, ConsoleColor.DarkBlue))),
+            new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
+            new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
+        };
         var table = new ConsoleTable(new ConsoleTableOptions()
         {
-            Columns = new List<string>(){ "Value", "Name", "P/L", "%"},
+            Columns = columnInColors.Values(),
+            ColumnColors = columnInColors.ColorFunctions(),
             NumberAlignment = Alignment.Right
         });
-        foreach (var position in positions.OrderByDescending(p => p.MarketValue))
+        // Add each value
+        foreach (var position in assets.OrderByDescending(p => p.MarketValue))
         {
             table.AddRow(
+                $"{position.Name}",
                 $"{position.MarketValue:##}",
-                $"{position.Name:blue}",
                 $"{position.ProfitOrLoss:##}",
                 $"{position.PercentageChange:P}"
             );
         }
+        // Print
         table.Write(format: Format.Color);
-        var total = positions.Sum(p => p.MarketValue);
+
+        var total = assets.Sum(p => p.MarketValue);
         ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
-        var totalProfit = positions.Sum(p => p.ProfitOrLoss);
+
+        var totalProfit = assets.Sum(p => p.ProfitOrLoss);
         ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
+
         var percentageGain = decimal.Divide(totalProfit, total);
         ExtendedConsole.WriteLine($"Yield: {percentageGain.ToString("P"):yellow}.");
     }
@@ -35,6 +51,10 @@ public static class PositionExtensions
 
 public static class StringExtensions
 {
+    public static bool IsDecimal(this string input)
+    {
+        return decimal.TryParse(input, out _);
+    }
     public static void Print(this IList<string> input)
     {
         var maxWidth = input.Max(x => x.Length);

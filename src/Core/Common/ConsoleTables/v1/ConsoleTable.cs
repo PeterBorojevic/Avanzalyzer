@@ -23,7 +23,12 @@ public class ConsoleTable
     };
 
     public ConsoleTable(params string[] columns)
-        : this(new ConsoleTableOptions { Columns = new List<string>(columns) })
+        : this(new ConsoleTableOptions
+        {
+            Columns = new List<string>(columns),
+            ColumnColors = Enumerable.Range(0, columns.Length)
+                .Select(i => new Func<object, ConsoleColor>(o => ConsoleColor.White))
+        })
     {
     }
 
@@ -191,7 +196,7 @@ public class ConsoleTable
                 {
                     var value = d[i]?.ToString() ?? "";
                     var length = columnLengths[i] - (GetTextWidth(value) - value.Length);
-                    return " | {" + i + "," + columnAlignment[i] + length + ":blue}"; // TODO What if we add color format here?
+                    return " | {" + i + "," + columnAlignment[i] + length + "}";
                 })
                 .Aggregate((s, a) => s + a) + " |";
         }).ToList();
@@ -255,7 +260,6 @@ public class ConsoleTable
         // create the divider
         var divider = Regex.Replace(columnHeaders, "[^| ]", "-");
         var dividerPlus = divider.Replace("|", "+").Replace(" ", "-");
-        //dividerPlus = dividerPlus.Remove(dividerPlus.Length - 3, 2);
 
         builder.AppendLine(dividerPlus);
         builder.AppendLine(columnHeaders);
@@ -272,14 +276,9 @@ public class ConsoleTable
 
     public string WriteMultipleStringAlternative()
     {
-        //var strings = new StringBuilder();
-
         // find the longest formatted line
         var columnHeaders = string.Format(Formats[0].TrimStart(), Columns.ToArray());
-
-        // add each row
-        //var results = Rows.Select((row, i) => string.Format(Formats[i + 1].TrimStart(), row)).ToList();
-
+        
         // create the divider
         var divider = Regex.Replace(columnHeaders, "[^| ]", "-");
         var dividerPlus = divider.Replace("|", "+").Replace(" ", "-");
@@ -291,9 +290,9 @@ public class ConsoleTable
         // Attempt 2
         var columnLengths = ColumnLengths();
         var columnAlignment = Enumerable.Range(0, Columns.Count).Select(GetNumberAlignment).ToList();
-        // TODO Add colors to columns in setup
-        var columnColors = Enumerable.Range(0, Columns.Count).Select(c =>
-            c == 1 ? ConsoleColor.White : ConsoleColor.Yellow).ToList();
+        // TODO Add support for separate colors for each column/row
+        // TODO Add value based coloring, eg. Func<value, ConsoleColor>
+        var columnColors = Options.ColumnColors.ToArray();
         foreach (var row in Rows) // here allLines == Rows
         {
             ExtendedConsole.WriteLine($"{dividerPlus}");
@@ -301,10 +300,11 @@ public class ConsoleTable
             {
                 var value = col.Value?.ToString() ?? "";
                 var length = columnLengths[col.Index] - (GetTextWidth(value) - value.Length);
-                var offset = -length; // columnAlignment[col.Index] is either "" or "-"
-                var t = "{" + 0 + "," + columnAlignment[col.Index] + length + "}"; // 0 was col.Index, but now frozen
+                // columnAlignment[col.Index] is either "" or "-"
+                // 0 used to be col.Index, but now frozen as we format the string each time
+                var t = "{" + 0 + "," + columnAlignment[col.Index] + length + "}"; 
                 var formattedValue = string.Format(t, value);
-                switch (columnColors[col.Index])
+                switch (columnColors[col.Index](value))
                 {
                     case ConsoleColor.Black:
                         ExtendedConsole.Write($"| {formattedValue:black} ");
@@ -404,18 +404,11 @@ public class ConsoleTable
         return columnLengths;
     }
 
-    public void Write(Format format = v1.Format.Default, ConsoleColor? color = null)
+    public void Write(Format format = v1.Format.Default)
     {
         SetFormats(ColumnLengths(), Enumerable.Range(0, Columns.Count).Select(GetNumberAlignment).ToList());
 
-        //if (color is not null)
-        //{
-        //    WriteColor(ToStringAlternative(), (ConsoleColor)color);
-        //    return;
-        //}
-
         ExtendedConsole.WriteLine($"{CreateString(format)}");
-        //Options.OutputTo.WriteLine(CreateString(format));
     }
 
     private string CreateString(Format format = v1.Format.Default)
@@ -431,6 +424,11 @@ public class ConsoleTable
         };
     }
 
+    /// <summary>
+    /// Use '[', ']' before and after message to be written in the specified <paramref name="color"/>.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="color"></param>
     private void WriteColor(string message, ConsoleColor color)
     {
         var pieces = Regex.Split(message, @"(\[[^\]]*\])");
@@ -466,22 +464,6 @@ public class ConsoleTable
     {
         return typeof(T).GetProperties().Select(x => x.PropertyType).ToArray();
     }
-}
-
-public class ConsoleTableOptions
-{
-    public IEnumerable<string> Columns { get; set; } = new List<string>();
-    public bool EnableCount { get; set; } = true;
-
-    /// <summary>
-    /// Enable only from a list of objects
-    /// </summary>
-    public Alignment NumberAlignment { get; set; } = Alignment.Left;
-
-    /// <summary>
-    /// The <see cref="TextWriter"/> to write to. Defaults to <see cref="Console.Out"/>.
-    /// </summary>
-    public TextWriter OutputTo { get; set; } = Console.Out;
 }
 
 public enum Format
