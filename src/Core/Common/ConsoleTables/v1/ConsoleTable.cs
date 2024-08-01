@@ -291,74 +291,20 @@ public class ConsoleTable
         var columnLengths = ColumnLengths();
         var columnAlignment = Enumerable.Range(0, Columns.Count).Select(GetNumberAlignment).ToList();
         //  TODO  Add support for separate colors for each column/row
-        // (Done) Add value based coloring, eg. Func<value, ConsoleColor> 
-        var columnColors = Options.ColumnColors.ToArray();
+        // (Done) Add value based coloring, eg. Func<value, ConsoleColor>
         var rowIndex = 0;
         foreach (var row in Rows) // here allLines == Rows
         {
             ExtendedConsole.WriteLine($"{dividerPlus}");
             foreach (var col in row.Select((x, i) => new Col(Value: x?.ToString(), Index: i, RowIndex: rowIndex)))
             {
-                var value = col.Value?.ToString() ?? "";
                 var length = columnLengths[col.Index] - (GetTextWidth(col.Value) - col.Value.Length);
                 // columnAlignment[col.Index] is either "" or "-"
                 // 0 used to be col.Index, but now frozen as we format the string each time
                 var t = "{" + 0 + "," + columnAlignment[col.Index] + length + "}"; 
                 var formattedValue = string.Format(t, col.Value);
-                switch (columnColors[col.Index](col.Value))
-                {
-                    case ConsoleColor.Black:
-                        ExtendedConsole.Write($"| {formattedValue:black} ");
-                        break;
-                    case ConsoleColor.DarkBlue:
-                        ExtendedConsole.Write($"| {formattedValue:darkblue} ");
-                        break;
-                    case ConsoleColor.DarkGreen:
-                        ExtendedConsole.Write($"| {formattedValue:darkgreen} ");
-                        break;
-                    case ConsoleColor.DarkCyan:
-                        ExtendedConsole.Write($"| {formattedValue:darkcyan} ");
-                        break;
-                    case ConsoleColor.DarkRed:
-                        ExtendedConsole.Write($"| {formattedValue:darkred} ");
-                        break;
-                    case ConsoleColor.DarkMagenta:
-                        ExtendedConsole.Write($"| {formattedValue:darkmagenta} ");
-                        break;
-                    case ConsoleColor.DarkYellow:
-                        ExtendedConsole.Write($"| {formattedValue:darkyellow} ");
-                        break;
-                    case ConsoleColor.Gray:
-                        ExtendedConsole.Write($"| {formattedValue:gray} ");
-                        break;
-                    case ConsoleColor.DarkGray:
-                        ExtendedConsole.Write($"| {formattedValue:darkgray} ");
-                        break;
-                    case ConsoleColor.Blue:
-                        ExtendedConsole.Write($"| {formattedValue:blue} ");
-                        break;
-                    case ConsoleColor.Green:
-                        ExtendedConsole.Write($"| {formattedValue:green} ");
-                        break;
-                    case ConsoleColor.Cyan:
-                        ExtendedConsole.Write($"| {formattedValue:cyan} ");
-                        break;
-                    case ConsoleColor.Red:
-                        ExtendedConsole.Write($"| {formattedValue:red} ");
-                        break;
-                    case ConsoleColor.Magenta:
-                        ExtendedConsole.Write($"| {formattedValue:magenta} ");
-                        break;
-                    case ConsoleColor.Yellow:
-                        ExtendedConsole.Write($"| {formattedValue:yellow} ");
-                        break;
-                    case ConsoleColor.White:
-                        ExtendedConsole.Write($"| {formattedValue:white} ");
-                        break;
-                    default:
-                        ExtendedConsole.Write($"| {formattedValue:white} ");
-                        break;
-                }
+
+                WriteColoredColumn(col, formattedValue);
             }
             ExtendedConsole.WriteLine($"|");
             rowIndex++;
@@ -367,6 +313,64 @@ public class ConsoleTable
         ExtendedConsole.WriteLine($"{dividerPlus}");
 
         return string.Empty;
+    }
+
+    private void WriteColoredColumn(Col col, string formattedValue)
+    {
+        switch (Options.ColumnColors.ToArray()[col.Index](col.Value))
+        {
+            case ConsoleColor.Black:
+                ExtendedConsole.Write($"| {formattedValue:black} ");
+                break;
+            case ConsoleColor.DarkBlue:
+                ExtendedConsole.Write($"| {formattedValue:darkblue} ");
+                break;
+            case ConsoleColor.DarkGreen:
+                ExtendedConsole.Write($"| {formattedValue:darkgreen} ");
+                break;
+            case ConsoleColor.DarkCyan:
+                ExtendedConsole.Write($"| {formattedValue:darkcyan} ");
+                break;
+            case ConsoleColor.DarkRed:
+                ExtendedConsole.Write($"| {formattedValue:darkred} ");
+                break;
+            case ConsoleColor.DarkMagenta:
+                ExtendedConsole.Write($"| {formattedValue:darkmagenta} ");
+                break;
+            case ConsoleColor.DarkYellow:
+                ExtendedConsole.Write($"| {formattedValue:darkyellow} ");
+                break;
+            case ConsoleColor.Gray:
+                ExtendedConsole.Write($"| {formattedValue:gray} ");
+                break;
+            case ConsoleColor.DarkGray:
+                ExtendedConsole.Write($"| {formattedValue:darkgray} ");
+                break;
+            case ConsoleColor.Blue:
+                ExtendedConsole.Write($"| {formattedValue:blue} ");
+                break;
+            case ConsoleColor.Green:
+                ExtendedConsole.Write($"| {formattedValue:green} ");
+                break;
+            case ConsoleColor.Cyan:
+                ExtendedConsole.Write($"| {formattedValue:cyan} ");
+                break;
+            case ConsoleColor.Red:
+                ExtendedConsole.Write($"| {formattedValue:red} ");
+                break;
+            case ConsoleColor.Magenta:
+                ExtendedConsole.Write($"| {formattedValue:magenta} ");
+                break;
+            case ConsoleColor.Yellow:
+                ExtendedConsole.Write($"| {formattedValue:yellow} ");
+                break;
+            case ConsoleColor.White:
+                ExtendedConsole.Write($"| {formattedValue:white} ");
+                break;
+            default:
+                ExtendedConsole.Write($"| {formattedValue:white} ");
+                break;
+        }
     }
 
 
