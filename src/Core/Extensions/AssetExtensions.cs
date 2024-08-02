@@ -23,7 +23,7 @@ public static class AssetExtensions
         {
             new("Namn"),
             new("Värde", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
-                .And(ColorFunctions.ValuesBelow(1001, ConsoleColor.DarkBlue))),
+                .And(ColorFunctions.ValuesBelow(1000, ConsoleColor.DarkBlue))),
             new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
             new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
         };
