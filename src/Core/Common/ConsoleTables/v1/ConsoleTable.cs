@@ -27,7 +27,7 @@ public class ConsoleTable
         {
             Columns = new List<string>(columns),
             ColumnColors = Enumerable.Range(0, columns.Length)
-                .Select(i => new Func<object, ConsoleColor>(o => ConsoleColor.White))
+                .Select(i => new Func<Cell, ConsoleColor>(_ => ConsoleColor.White))
         })
     {
     }
@@ -37,6 +37,18 @@ public class ConsoleTable
         Options = options ?? throw new ArgumentNullException("options");
         Rows = new List<object[]>();
         Columns = new List<object>(options.Columns);
+    }
+
+    public ConsoleTable(IList<ColumnInColor> columnInColors)
+    {
+        Options = new ConsoleTableOptions()
+        {
+            Columns = columnInColors.Values(),
+            ColumnColors = columnInColors.ColorFunctions(),
+            NumberAlignment = Alignment.Right
+        };
+        Rows = new List<object[]>();
+        Columns = new List<object>(Options.Columns);
     }
 
     public ConsoleTable AddColumn(IEnumerable<string> names)
@@ -287,20 +299,19 @@ public class ConsoleTable
         ExtendedConsole.WriteLine($"{columnHeaders}");
         
         // Print each row
-        // Attempt 2
         var columnLengths = ColumnLengths();
         var columnAlignment = Enumerable.Range(0, Columns.Count).Select(GetNumberAlignment).ToList();
-        //  TODO  Add support for separate colors for each column/row
+        // (Done) Add support for separate colors for each column/row
         // (Done) Add value based coloring, eg. Func<value, ConsoleColor>
         var rowIndex = 0;
-        foreach (var row in Rows) // here allLines == Rows
+        foreach (var row in Rows)
         {
             ExtendedConsole.WriteLine($"{dividerPlus}");
-            foreach (var col in row.Select((x, i) => new Col(Value: x?.ToString(), Index: i, RowIndex: rowIndex)))
+            foreach (var col in row.Select((x, i) => new Cell(Value: x?.ToString(), Index: i, RowIndex: rowIndex)))
             {
                 var length = columnLengths[col.Index] - (GetTextWidth(col.Value) - col.Value.Length);
                 // columnAlignment[col.Index] is either "" or "-"
-                // 0 used to be col.Index, but now frozen as we format the string each time
+                // 0 used to be col.Index, but now frozen as we format the string for each cell
                 var t = "{" + 0 + "," + columnAlignment[col.Index] + length + "}"; 
                 var formattedValue = string.Format(t, col.Value);
 
@@ -315,9 +326,9 @@ public class ConsoleTable
         return string.Empty;
     }
 
-    private void WriteColoredColumn(Col col, string formattedValue)
+    private void WriteColoredColumn(Cell col, string formattedValue)
     {
-        switch (Options.ColumnColors.ToArray()[col.Index](col.Value))
+        switch (Options.ColumnColors.ToArray()[col.Index](col))
         {
             case ConsoleColor.Black:
                 ExtendedConsole.Write($"| {formattedValue:black} ");

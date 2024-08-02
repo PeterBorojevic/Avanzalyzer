@@ -1,9 +1,11 @@
-﻿namespace Core.Common.ConsoleTables.v1;
+﻿using Core.Common.ConsoleTables.v2;
+
+namespace Core.Common.ConsoleTables.v1;
 
 public class ConsoleTableOptions
 {
     public IEnumerable<string> Columns { get; set; } = new List<string>();
-    public IEnumerable<Func<string, ConsoleColor>> ColumnColors { get; set; } = new List<Func<string, ConsoleColor>>();
+    public IEnumerable<Func<Cell, ConsoleColor>> ColumnColors { get; set; } = new List<Func<Cell, ConsoleColor>>();
     public bool EnableCount { get; set; } = true;
 
     /// <summary>
@@ -17,15 +19,18 @@ public class ConsoleTableOptions
     public TextWriter OutputTo { get; set; } = Console.Out;
 }
 
+/// <summary>
+/// Contain column headers and column settings. Such as functions to decide the cells color
+/// </summary>
 public class ColumnInColor
 {
-    public string Value { get; set; }
+    public Cell Value { get; set; }
     public ConsoleColor Color => _colorFunc.Invoke(Value);
-    private Func<string, ConsoleColor> _colorFunc;
+    private Func<Cell, ConsoleColor> _colorFunc;
 
     public ColumnInColor(string value, ConsoleColorFunctions colorPresets = ConsoleColorFunctions.Normal)
     {
-        Value = value;
+        Value = new Cell(value, 0);
         _colorFunc = colorPresets switch
         {
             ConsoleColorFunctions.Normal => ColorFunctions.Normal,
@@ -35,18 +40,18 @@ public class ColumnInColor
         };
     }
 
-    public ColumnInColor(string value, Func<string, ConsoleColor> colorFunc)
+    public ColumnInColor(string value, Func<Cell, ConsoleColor> colorFunc)
     {
-        Value = value;
+        Value = new Cell(value, 0);
         _colorFunc = colorFunc;
     }
 
-    public void SetColor(Func<string, ConsoleColor> colorFunc)
+    public void SetColor(Func<Cell, ConsoleColor> colorFunc)
     {
         _colorFunc = colorFunc;
     }
 
-    public Func<string, ConsoleColor> GetColorFunction() => _colorFunc;
+    public Func<Cell, ConsoleColor> GetColorFunction() => _colorFunc;
 
 }
 
@@ -54,7 +59,7 @@ public static class ColumnInColorExtensions
 {
     public static IEnumerable<string> Values(this IEnumerable<ColumnInColor> columns)
     {
-        return columns.Select(c => c.Value);
+        return columns.Select(c => c.Value.Value);
     }
 
     public static IEnumerable<ConsoleColor> Colors(this IEnumerable<ColumnInColor> columns)
@@ -62,7 +67,7 @@ public static class ColumnInColorExtensions
         return columns.Select(c => c.Color);
     }
 
-    public static IEnumerable<Func<string, ConsoleColor>> ColorFunctions(this IEnumerable<ColumnInColor> columns)
+    public static IEnumerable<Func<Cell, ConsoleColor>> ColorFunctions(this IEnumerable<ColumnInColor> columns)
     {
         return columns.Select(c => c.GetColorFunction());
     }
@@ -81,42 +86,45 @@ public static class SpecificationExtensions
     {
         return input => function.Invoke(input) is not ConsoleColor.White ? function.Invoke(input) : convertDefaultTo.Invoke(input);
     }
+    public static Func<Cell, ConsoleColor> And(this Func<Cell, ConsoleColor> function, Func<Cell, ConsoleColor> convertDefaultTo)
+    {
+        return input => function.Invoke(input) is not ConsoleColor.White ? function.Invoke(input) : convertDefaultTo.Invoke(input);
+    }
 }
 
 public static class ColorFunctions
 {
-    public static Func<string, ConsoleColor> Normal => _ => ConsoleColor.White;
-
-    /// <summary>
-    /// Checks the decimal if it's positive (green) or negative (red). Other values are white.
-    /// </summary>
-    public static Func<string, ConsoleColor> PositiveGreen_NegativeRed => input
-        => decimal.TryParse(input, out var val)
+    public static Func<Cell, ConsoleColor> Normal => _ => ConsoleColor.White;
+    
+    public static Func<Cell, ConsoleColor> PositiveGreen_NegativeRed => column
+        => decimal.TryParse(column.Value, out var val)
             ? val > 0
                 ? ConsoleColor.Green
                 : ConsoleColor.Red
             : ConsoleColor.White;
 
-    public static Func<string, ConsoleColor> PercentagePositiveBlue_NegativeRed => input
-        => decimal.TryParse(input.Split(" ")[0], out var val)
+    public static Func<Cell, ConsoleColor> PercentagePositiveBlue_NegativeRed => column
+        => decimal.TryParse(column.Value.Split(" ")[0], out var val)
             ? val > 0
                 ? ConsoleColor.Cyan
                 : ConsoleColor.Red
             : ConsoleColor.White;
 
-    public static Func<string, ConsoleColor> ValuesAbove(decimal value, ConsoleColor color) => input
-        => decimal.TryParse(input, out var val)
+    public static Func<Cell, ConsoleColor> ValuesAbove(decimal value, ConsoleColor color) => column
+        => decimal.TryParse(column.Value, out var val)
             ? val > value
                 ? color
                 : ConsoleColor.White
             : ConsoleColor.White;
-    public static Func<string, ConsoleColor> ValuesBelow(decimal value, ConsoleColor color) => input
-        => decimal.TryParse(input, out var val)
+    public static Func<Cell, ConsoleColor> ValuesBelow(decimal value, ConsoleColor color) => column
+        => decimal.TryParse(column.Value, out var val)
             ? val < value
                 ? color
                 : ConsoleColor.White
             : ConsoleColor.White;
-    //public static Func<string, ConsoleColor> Function1 => input =>
-    //public static Func<string, ConsoleColor> Function2 => input =>
-    //public static Func<string, ConsoleColor> Function3 => input => 
+
+
+    //public static Func<Cell, ConsoleColor> Function1 => input =>
+    //public static Func<Cell, ConsoleColor> Function2 => input =>
+    //public static Func<Cell, ConsoleColor> Function3 => input => 
 }

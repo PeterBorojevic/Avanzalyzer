@@ -5,6 +5,7 @@ namespace Core.Models.Dtos;
 public class Account
 {
     [Name("Bank")]
+    [Optional]
     public string Bank { get; set; }
     [Name("Kontonummer")]
     public string AccountNumber { get; set; }

@@ -1,9 +1,9 @@
-﻿using Core.Common.ConsoleTables.v2;
+﻿using Core.Common.ConsoleTables;
 using Core.Common.Enums;
+using Core.Extensions;
 using Core.Models.Dtos;
 using Core.Models.Securities;
 using Core.Models.Securities.Base;
-using System.Collections.Generic;
 
 namespace Core.Models;
 
@@ -39,16 +39,28 @@ public class Portfolio
     public List<Asset> Assets { get; }
     public List<Account> Accounts { get; set; }
 
-    public IEnumerable<Asset> Select(AssetType type)
+    public decimal Value => Assets.MarketValue();
+    public decimal Profit => Assets.ProfitOrLoss();
+
+    public IList<Asset> Select(AssetType type)
     {
-        return Assets.Where(a => a.Type == type);
+        return Assets.Where(a => a.Type == type).ToList();
     }
 
-    //public IEnumerable<Asset> Get(Account type)
 
+    //public IEnumerable<Asset> Get(Account type)
+    //TODO Portfolio should not be the printer. We could make an interface that contains a method for extracting printable objects
     public void Print(AssetType type)
     {
-       //TODO Portfolio should not be the printer. We could make an interface that contains a method for extracting printable objects
+        var assets = Select(type);
+        var total = assets.MarketValue();
+        ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
+
+        var totalProfit = assets.ProfitOrLoss();
+        ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
+
+        var percentageGain = decimal.Divide(totalProfit, total);
+        ExtendedConsole.WriteLine($"Yield: {percentageGain.ToString("P"):yellow}.");
     }
     
 }

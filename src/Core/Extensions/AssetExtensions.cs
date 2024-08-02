@@ -7,8 +7,16 @@ namespace Core.Extensions;
 
 public static class AssetExtensions
 {
+    public static decimal MarketValue(this IEnumerable<Asset> assets)
+    {
+        return assets.Sum(a => a.MarketValue);
+    }
+    public static decimal ProfitOrLoss(this IEnumerable<Asset> assets)
+    {
+        return assets.Sum(a => a.ProfitOrLoss);
+    }
 
-    public static void PrintProfitOrLoss(this IEnumerable<Asset> assets)
+    public static void PrintProfitOrLoss(this IList<Asset> assets)
     {
         // Header and color setup TODO refactor
         var columnInColors = new List<ColumnInColor>()
@@ -19,12 +27,7 @@ public static class AssetExtensions
             new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
             new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
         };
-        var table = new ConsoleTable(new ConsoleTableOptions()
-        {
-            Columns = columnInColors.Values(),
-            ColumnColors = columnInColors.ColorFunctions(),
-            NumberAlignment = Alignment.Right
-        });
+        var table = new ConsoleTable(columnInColors);
         // Add each value
         foreach (var position in assets.OrderByDescending(p => p.MarketValue))
         {
@@ -37,15 +40,6 @@ public static class AssetExtensions
         }
         // Print
         table.Write(format: Format.Color);
-
-        var total = assets.Sum(p => p.MarketValue);
-        ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
-
-        var totalProfit = assets.Sum(p => p.ProfitOrLoss);
-        ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
-
-        var percentageGain = decimal.Divide(totalProfit, total);
-        ExtendedConsole.WriteLine($"Yield: {percentageGain.ToString("P"):yellow}.");
     }
 }
 
@@ -55,29 +49,5 @@ public static class StringExtensions
     {
         return decimal.TryParse(input, out _);
     }
-    public static void Print(this IList<string> input)
-    {
-        var maxWidth = input.Max(x => x.Length);
-        Table.WriteLine(maxWidth);
-        foreach (var line in input)
-        {
-            var text = $"| {line} |";
-            Console.WriteLine(text);
-        }
-        Table.WriteLine(maxWidth);
-    }
-}
-
-public class Table
-{
-    /// <summary>
-    /// Prints a line "+---+" of a certain width.
-    /// Minimum width = 2. eg. "++"
-    /// </summary>
-    /// <param name="width"></param>
-    public static void WriteLine(int width)
-    {
-        width = Math.Max(2, width);
-        Console.WriteLine($"+{string.Concat(Enumerable.Repeat("-", width - 2))}+");
-    }
+    
 }

@@ -23,8 +23,9 @@ class Program
         var portfolio = portfolioManager.LoadPortfolioData();
         // Print stocks
         portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
-        portfolio.Select(AssetType.Fund).PrintProfitOrLoss();
-        portfolio.Select(AssetType.Stock).PrintProfitOrLoss();
+        portfolio.Print(AssetType.Etf);
+        //portfolio.Select(AssetType.Fund).PrintProfitOrLoss();
+        //portfolio.Select(AssetType.Stock).PrintProfitOrLoss();
 
     }
 }
