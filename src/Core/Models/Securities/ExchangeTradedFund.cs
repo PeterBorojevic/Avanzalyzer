@@ -6,7 +6,7 @@ namespace Core.Models.Securities;
 
 public class ExchangeTradedFund : Asset
 {
-    public ExchangeTradedFund(Position position) : base(position, AssetType.Etf)
+    public ExchangeTradedFund(Position position) : base(position, AssetType.ExchangeTradedFund)
     {
     }
 }

@@ -10,6 +10,7 @@ public static class RepoInstaller
     {
         services.AddTransient<IAccountParser, AccountParser>();
         services.AddTransient<IPositionParser, PositionParser>();
+        services.AddTransient<ITransactionParser, TransactionParser>();
 
         return services;
     }

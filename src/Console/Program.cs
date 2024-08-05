@@ -2,40 +2,31 @@
 using Core.Common.ConsoleTables;
 using Core.Extensions;
 using Core.Models;
+using Core.Models.Dtos;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 class Program
 {
-    private static void TestMultipleLines(Portfolio portfolio)
-    {
-        var unformattedLines = new List<FormattableString>();
-        var total = portfolio.Assets.MarketValue();
-        ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
-
-        var totalProfit = portfolio.Assets.ProfitOrLoss();
-        ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
-
-        var percentageGain = decimal.Divide(totalProfit, total);
-        ExtendedConsole.WriteLine($"Yield: {percentageGain.ToString("P"):yellow}.");
-
-    }
-
     static void Main(string[] args)
     {
         var serviceProvider = new ServiceCollection()
             .AddRepositories()
             .AddFeatures()
-            .AddSingleton<PortfolioManager>()
+            .AddSingleton<PortfolioRepository>()
             .BuildServiceProvider();
 
-        var portfolioManager = serviceProvider.GetService<PortfolioManager>();
+        var portfolioManager = serviceProvider.GetService<PortfolioRepository>();
 
         
         var portfolio = portfolioManager.LoadPortfolioData();
+        var totals = new AccountTotals(portfolio);
+        totals.PrintToConsole();
+
+        var transactions = portfolioManager.LoadTransactions();
+
         // Print stocks
-        TestMultipleLines(portfolio);
         //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
         //portfolio.Assets.PrintProfitOrLoss();
         //portfolio.Print(AssetType.Etf);

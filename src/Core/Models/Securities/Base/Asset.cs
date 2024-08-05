@@ -1,6 +1,6 @@
 ﻿using Core.Common.Converters;
 using Core.Common.Enums;
-using Core.Models.Dtos;
+using Core.Models.Dtos.Csv;
 using CsvHelper.Configuration.Attributes;
 
 namespace Core.Models.Securities.Base;

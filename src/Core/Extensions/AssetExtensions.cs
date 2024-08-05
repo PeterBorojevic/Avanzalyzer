@@ -14,6 +14,17 @@ public static class AssetExtensions
         return assets.Sum(a => a.ProfitOrLoss);
     }
 
+    public static decimal AcquisitionCost(this IEnumerable<Asset> assets)
+    {
+        return assets.Sum(a => a.AcquisitionCost);
+    }
+
+    public static decimal TotalPercentageGain(this IEnumerable<Asset> assets)
+    {
+        assets = assets.ToList();
+        return decimal.Divide(assets.MarketValue(), assets.AcquisitionCost()) - 1;
+    }
+
     public static void PrintProfitOrLoss(this IList<Asset> assets)
     {
         // Header and color setup TODO refactor

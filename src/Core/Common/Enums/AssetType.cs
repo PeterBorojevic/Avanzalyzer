@@ -4,6 +4,15 @@ public enum AssetType
 {
     Stock,
     Fund,
-    Etf,
-    Certificate
+    ExchangeTradedFund,
+    Certificate,
+    Bond,
+    Option,
+    FutureForward,
+    Warrant,
+    Index,
+    PremiumBond,
+    SubscriptionOption,
+    EquityLinkedBond,
+    Convertible
 }

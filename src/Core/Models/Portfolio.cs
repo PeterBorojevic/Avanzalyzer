@@ -1,7 +1,7 @@
 ﻿using Core.Common.ConsoleTables;
 using Core.Common.Enums;
 using Core.Extensions;
-using Core.Models.Dtos;
+using Core.Models.Dtos.Csv;
 using Core.Models.Securities;
 using Core.Models.Securities.Base;
 
@@ -20,7 +20,7 @@ public class Portfolio
         Assets = new List<Asset>(ConvertPositionsToAssets(positions));
     }
 
-    private IEnumerable<Asset> ConvertPositionsToAssets(List<Position> positions)
+    private static IEnumerable<Asset> ConvertPositionsToAssets(List<Position> positions)
     {
         var assets = positions.Select(p =>
         {
