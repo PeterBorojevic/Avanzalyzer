@@ -54,9 +54,21 @@ public class Portfolio
     {
         var assets = Select(type);
         var total = assets.MarketValue();
-        ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
+        ExtendedConsole.WriteLine($"Total {Enum.GetName(type)}: {total.ToString("##"):green} kr.");
 
         var totalProfit = assets.ProfitOrLoss();
+        ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
+
+        var percentageGain = decimal.Divide(totalProfit, total);
+        ExtendedConsole.WriteLine($"Yield: {percentageGain.ToString("P"):yellow}.");
+    }
+    
+    public void Print()
+    {
+        var total = Assets.MarketValue();
+        ExtendedConsole.WriteLine($"Total: {total.ToString("##"):green} kr.");
+
+        var totalProfit = Assets.ProfitOrLoss();
         ExtendedConsole.WriteLine($"P/L: {totalProfit.ToString("##"):green} kr.");
 
         var percentageGain = decimal.Divide(totalProfit, total);

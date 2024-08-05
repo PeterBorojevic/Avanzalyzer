@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using Core.Common.Interfaces;
-using Core.Models.Dtos;
+using Core.Models.Dtos.Csv;
 using CsvHelper;
 using CsvHelper.Configuration;
 

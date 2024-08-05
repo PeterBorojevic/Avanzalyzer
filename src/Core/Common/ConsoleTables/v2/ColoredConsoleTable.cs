@@ -1,4 +1,5 @@
 ﻿using Core.Common.ConsoleTables.v1;
+using Core.Extensions;
 
 namespace Core.Common.ConsoleTables.v2;
 

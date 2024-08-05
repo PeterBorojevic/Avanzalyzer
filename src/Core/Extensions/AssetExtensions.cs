@@ -1,6 +1,4 @@
-﻿using Core.Common.ConsoleTables;
-using Core.Common.ConsoleTables.v1;
-using Core.Models.Dtos;
+﻿using Core.Common.ConsoleTables.v1;
 using Core.Models.Securities.Base;
 
 namespace Core.Extensions;

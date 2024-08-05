@@ -1,4 +1,4 @@
-﻿using Core.Models.Dtos;
+﻿using Core.Models.Dtos.Csv;
 
 namespace Core.Common.Interfaces;
 

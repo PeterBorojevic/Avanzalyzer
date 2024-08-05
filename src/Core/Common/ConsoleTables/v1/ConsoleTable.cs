@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
+using Core.Extensions;
 
 namespace Core.Common.ConsoleTables.v1;
 

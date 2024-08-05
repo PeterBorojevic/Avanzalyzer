@@ -1,8 +1,8 @@
-﻿using Core.Models.Dtos;
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 using Core.Common.Interfaces;
+using Core.Models.Dtos.Csv;
 
 namespace Infrastructure.Parsers;
 

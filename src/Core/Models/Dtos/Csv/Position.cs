@@ -1,7 +1,7 @@
 ﻿using Core.Common.Converters;
 using CsvHelper.Configuration.Attributes;
 
-namespace Core.Models.Dtos;
+namespace Core.Models.Dtos.Csv;
 
 public class Position
 {

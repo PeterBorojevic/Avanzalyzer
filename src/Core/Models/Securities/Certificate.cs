@@ -1,5 +1,5 @@
 ﻿using Core.Common.Enums;
-using Core.Models.Dtos;
+using Core.Models.Dtos.Csv;
 using Core.Models.Securities.Base;
 
 namespace Core.Models.Securities;

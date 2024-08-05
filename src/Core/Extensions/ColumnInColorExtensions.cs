@@ -1,4 +1,6 @@
-﻿namespace Core.Common.ConsoleTables.v1;
+﻿using Core.Common.ConsoleTables.v1;
+
+namespace Core.Extensions;
 
 public static class ColumnInColorExtensions
 {

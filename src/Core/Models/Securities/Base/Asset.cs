@@ -52,7 +52,7 @@ public abstract class Asset
     public string ISIN { get; set; }
 
     /// <summary>
-    /// Valuta (SEK, EUR, USD, NOK 
+    /// Valuta (SEK, EUR, USD, NOK, etc)
     /// </summary>
     [Name("Valuta")]
     public string Currency { get; set; }
