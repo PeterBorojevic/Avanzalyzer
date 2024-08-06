@@ -12,7 +12,7 @@ public class TransactionParser : ITransactionParser
 {
     public List<Transaction> ParseAccounts(string filePath)
     {
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        var config = new CsvConfiguration(new CultureInfo("sv-SE", false))
         {
             Delimiter = ";",
             HasHeaderRecord = true,

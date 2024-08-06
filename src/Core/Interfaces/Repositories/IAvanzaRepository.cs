@@ -3,7 +3,7 @@ using Core.Models.Data;
 
 namespace Core.Interfaces.Repositories;
 
-public interface IPortfolioRepository
+public interface IAvanzaRepository
 {
     Portfolio LoadPortfolioData();
     List<Transaction> LoadTransactions();

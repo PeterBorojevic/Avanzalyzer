@@ -3,12 +3,12 @@ using Core.Common.Interfaces;
 using Core.Extensions;
 using Core.Models.Securities.Base;
 
-namespace Core.Models.Dtos;
+namespace Core.Models.Dtos.Export;
 
 public class AccountTotals : IPrintable
 {
     private Dictionary<string, List<Asset>> _accountAssets = new();
-    private List<ColumnInColor> _columns = new()
+    private readonly List<ColumnInColor> _columns = new()
     {
         new ColumnInColor("Konto"),
         new ColumnInColor("Value", cell => ConsoleColor.Cyan),
@@ -31,8 +31,8 @@ public class AccountTotals : IPrintable
         foreach (var kvp in _accountAssets)
         {
             table.AddRow(
-                kvp.Key, 
-                $"{kvp.Value.MarketValue():##}", 
+                kvp.Key,
+                $"{kvp.Value.MarketValue():##}",
                 $"{kvp.Value.ProfitOrLoss():##}",
                 $"{kvp.Value.TotalPercentageGain():P}");
         }

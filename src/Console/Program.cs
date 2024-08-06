@@ -1,4 +1,6 @@
 ﻿using Application;
+using Core.Common.Enums;
+using Core.Common.Interfaces.Application;
 using Core.Interfaces.Repositories;
 using Core.Models.Dtos;
 using Infrastructure;
@@ -13,15 +15,19 @@ class Program
             .AddRepositories()
             .AddFeatures()
             .BuildServiceProvider();
-
-        var portfolioRepository = serviceProvider.GetService<IPortfolioRepository>();
-
         
-        var portfolio = portfolioRepository.LoadPortfolioData();
-        var totals = new AccountTotals(portfolio);
-        totals.PrintToConsole();
+        var analyzer = serviceProvider.GetService<IFinancialAnalyzerService>();
 
-        var transactions = portfolioRepository.LoadTransactions();
+        analyzer.GetDividends(GroupingType.ByYear).PrintToConsole();
+
+        analyzer.GetAccountTotals().PrintToConsole();
+
+        analyzer.GetDepositsAndWithdrawals().PrintToConsole();
+        //var portfolio = portfolioRepository.LoadPortfolioData();
+        //var totals = new AccountTotals(portfolio);
+        //totals.PrintToConsole();
+
+        //var transactions = portfolioRepository.LoadTransactions();
 
         // Print stocks
         //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();

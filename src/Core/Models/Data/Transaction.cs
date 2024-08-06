@@ -13,17 +13,17 @@ public class Transaction
     
     public string AssetNameOrDescription { get; set; }
     
-    public decimal? Quantity { get; set; }
+    public decimal Quantity { get; set; }
     
-    public decimal? Price { get; set; }
+    public decimal Price { get; set; }
 
     /// <summary>
     /// Total amount for the transaction,
     /// For eg. asset buys/sells, equal to <seealso cref="Quantity"/> * <seealso cref="Price"/>
     /// </summary>
-    public decimal? Amount { get; set; }
+    public decimal Amount { get; set; }
     
-    public decimal? BrokerageFee { get; set; }
+    public decimal BrokerageFee { get; set; }
     
     public string Currency { get; set; }
     

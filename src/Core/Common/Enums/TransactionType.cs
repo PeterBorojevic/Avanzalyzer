@@ -6,9 +6,13 @@ public enum TransactionType
     Options,
     Forex,
     /// <summary>
-    /// Insättning/Uttag
+    /// Insättning
     /// </summary>
-    DepositWithdraw,
+    Deposit,
+    /// <summary>
+    /// Uttag
+    /// </summary>
+    Withdraw,
     /// <summary>
     /// Köp/Sälj
     /// </summary>

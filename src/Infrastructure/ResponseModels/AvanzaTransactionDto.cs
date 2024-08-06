@@ -1,6 +1,7 @@
 ﻿using Core.Models.Data;
 using Core.Common.Enums;
 using CsvHelper.Configuration.Attributes;
+using Core.Common.Converters;
 
 namespace Infrastructure.ResponseModels;
 
@@ -19,24 +20,24 @@ public class AvanzaTransactionDto
     public string AssetNameOrDescription { get; set; }
 
     [Name("Antal")]
-    [NullValues("-")]
-    public decimal? Quantity { get; set; }
+    [TypeConverter(typeof(CustomDecimalConverter))]
+    public decimal Quantity { get; set; }
 
     [Name("Kurs")]
-    [NullValues("-")]
-    public decimal? Price { get; set; }
+    [TypeConverter(typeof(CustomDecimalConverter))]
+    public decimal Price { get; set; }
     
     /// <summary>
     /// Total amount for the transaction,
     /// For eg. asset buys/sells, equal to <seealso cref="Quantity"/> * <seealso cref="Price"/>
     /// </summary>
     [Name("Belopp")]
-    [NullValues("-")]
-    public decimal? Amount { get; set; }
+    [TypeConverter(typeof(CustomDecimalConverter))]
+    public decimal Amount { get; set; }
 
     [Name("Courtage")]
-    [NullValues("-")]
-    public decimal? BrokerageFee { get; set; }
+    [TypeConverter(typeof(CustomDecimalConverter))]
+    public decimal BrokerageFee { get; set; }
 
     [Name("Valuta")]
     public string Currency { get; set; }
@@ -54,8 +55,8 @@ public class AvanzaTransactionDto
         AccountName = AccountName,
         TransactionType = TransactionType switch
         {
-            "Insättning" => Core.Common.Enums.TransactionType.DepositWithdraw, 
-            "Uttag" => Core.Common.Enums.TransactionType.DepositWithdraw,
+            "Insättning" => Core.Common.Enums.TransactionType.Deposit, 
+            "Uttag" => Core.Common.Enums.TransactionType.Withdraw,
             "Köp" => Core.Common.Enums.TransactionType.BuySell,
             "Sälj" => Core.Common.Enums.TransactionType.BuySell,
             "Utdelning" => Core.Common.Enums.TransactionType.Dividend,

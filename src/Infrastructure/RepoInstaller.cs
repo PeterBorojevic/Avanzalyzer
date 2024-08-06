@@ -14,7 +14,7 @@ public static class RepoInstaller
         services.AddTransient<IPositionParser, PositionParser>();
         services.AddTransient<ITransactionParser, TransactionParser>();
         // Repositories
-        services.AddSingleton<IPortfolioRepository, PortfolioRepository>();
+        services.AddSingleton<IAvanzaRepository, AvanzaRepository>();
 
         return services;
     }

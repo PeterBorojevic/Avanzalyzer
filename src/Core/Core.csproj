@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\Repositories\" />
+    <Folder Include="Common\Interfaces\Application\" />
     <Folder Include="Models\Excel\" />
     <Folder Include="Models\Data\" />
   </ItemGroup>

@@ -7,7 +7,7 @@ using Core.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories;
 
-public class PortfolioRepository : IPortfolioRepository
+public class AvanzaRepository : IAvanzaRepository
 {
     private readonly IAccountParser _accountParser;
     private readonly IPositionParser _positionParser;
@@ -16,7 +16,7 @@ public class PortfolioRepository : IPortfolioRepository
     private const string AccountFileSuffix = "_konto.csv";
     private const string PositionFileSuffix = "_positioner.csv";
 
-    public PortfolioRepository(IAccountParser accountParser, IPositionParser positionParser, ITransactionParser transactionParser)
+    public AvanzaRepository(IAccountParser accountParser, IPositionParser positionParser, ITransactionParser transactionParser)
     {
         _accountParser = accountParser;
         _positionParser = positionParser;
