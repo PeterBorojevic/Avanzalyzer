@@ -1,5 +1,7 @@
 ﻿using Core.Common.Interfaces;
+using Core.Interfaces.Repositories;
 using Infrastructure.Parsers;
+using Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
@@ -11,6 +13,8 @@ public static class RepoInstaller
         services.AddTransient<IAccountParser, AccountParser>();
         services.AddTransient<IPositionParser, PositionParser>();
         services.AddTransient<ITransactionParser, TransactionParser>();
+        // Repositories
+        services.AddSingleton<IPortfolioRepository, PortfolioRepository>();
 
         return services;
     }

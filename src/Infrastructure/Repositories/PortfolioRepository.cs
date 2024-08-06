@@ -1,13 +1,13 @@
-﻿using System.Globalization;
-using Core.Common.Interfaces;
+﻿using Core.Common.Interfaces;
 using Core.Models;
 using Core.Models.Data;
 using Core.Models.Securities.Base;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Globalization;
+using Core.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories;
 
-public class PortfolioRepository
+public class PortfolioRepository : IPortfolioRepository
 {
     private readonly IAccountParser _accountParser;
     private readonly IPositionParser _positionParser;

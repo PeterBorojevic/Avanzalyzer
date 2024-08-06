@@ -1,7 +1,5 @@
 ﻿using Application;
-using Core.Common.ConsoleTables;
-using Core.Extensions;
-using Core.Models;
+using Core.Interfaces.Repositories;
 using Core.Models.Dtos;
 using Infrastructure;
 using Infrastructure.Repositories;
@@ -14,17 +12,16 @@ class Program
         var serviceProvider = new ServiceCollection()
             .AddRepositories()
             .AddFeatures()
-            .AddSingleton<PortfolioRepository>()
             .BuildServiceProvider();
 
-        var portfolioManager = serviceProvider.GetService<PortfolioRepository>();
+        var portfolioRepository = serviceProvider.GetService<IPortfolioRepository>();
 
         
-        var portfolio = portfolioManager.LoadPortfolioData();
+        var portfolio = portfolioRepository.LoadPortfolioData();
         var totals = new AccountTotals(portfolio);
         totals.PrintToConsole();
 
-        var transactions = portfolioManager.LoadTransactions();
+        var transactions = portfolioRepository.LoadTransactions();
 
         // Print stocks
         //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
