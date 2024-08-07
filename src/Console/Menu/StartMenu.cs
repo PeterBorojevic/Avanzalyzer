@@ -36,19 +36,14 @@ public class StartMenu : IStartMenu
         var shouldContinue = true;
         while (shouldContinue)
         {
-            System.Console.Clear();
-            System.Console.WriteLine("START MENU \n\nPress a number \n ");
-
-            var menu = new List<MenuItem>()
-            {
-                new(1, "Overview", ShowOverview),
-                new(2, "Assets", ShowAssets),
-                new(3, "Analysis", ShowAnalysis),
-                new(4, "Transactions", ShowTransactions),
-            };
-            menu.Print();
-            var key = ReadKey();
-            menu.Goto(key);
+            var menu = new NumberedMenu("START MENU \n\nPress a number \n ",
+                new MenuItem(1, "Overview", OnClick: ShowOverview),
+                new MenuItem(2, "Assets", ShowAssets),
+                new MenuItem(3, "Analysis", ShowAnalysis),
+                new MenuItem(4, "Transactions", ShowTransactions)
+            );
+            menu.Display();
+            shouldContinue = menu.GotoUserSelection();
             
             // TODO add function to continue
         }
@@ -56,13 +51,20 @@ public class StartMenu : IStartMenu
 
     public bool DoNothing() => true;
 
+    public bool PressAnyKeyToReturn()
+    {
+        System.Console.WriteLine("\n Click any key to return");
+        ReadKey();
+        return true;
+    }
+
     private static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
 
     public bool ShowOverview()
     {
         System.Console.WriteLine("OVERVIEW \n");
         _analyzer.Get(AnalysisCalculationType.AccountTotals).PrintToConsole();
-        return true;
+        return PressAnyKeyToReturn();
     }
 
     public bool ShowAssets()
@@ -76,7 +78,7 @@ public class StartMenu : IStartMenu
         //portfolio.Print(AssetType.Etf);
         //portfolio.Select(AssetType.Fund).PrintProfitOrLoss();
         //portfolio.Select(AssetType.Stock).PrintProfitOrLoss();
-        return true;
+        return PressAnyKeyToReturn();
     }
 
     public bool ShowAnalysis()
@@ -85,9 +87,8 @@ public class StartMenu : IStartMenu
         _analyzer.GetDividends(GroupingType.ByYear).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
-        System.Console.WriteLine("\n Click any key to return");
-        ReadKey();
-        return true;
+
+        return PressAnyKeyToReturn();
     }
 
     public bool ShowTransactions()
@@ -95,7 +96,7 @@ public class StartMenu : IStartMenu
         System.Console.WriteLine("TRANSACTIONS \n");
 
         System.Console.WriteLine("404 - Work in progress \n");
-        return true;
+        return PressAnyKeyToReturn();
     }
 
 }

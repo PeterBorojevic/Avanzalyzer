@@ -1,4 +1,5 @@
 ﻿using Console.Interfaces;
+using Console.Models;
 using Core.Common.Interfaces.Application;
 
 namespace Console.Menu;

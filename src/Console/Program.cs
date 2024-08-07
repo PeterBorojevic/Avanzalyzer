@@ -21,7 +21,12 @@ class Program
 
 
 /*  TODO
- *  Menu service to access different features
+ * (doing) Menu service to access different features
+ * Add user action flow between menus (menus in menus)
+ * or state of what is visible
+ * Add interfaces and abstract models for menus
+ * Add storing settings, eg. exclude accounts
+ *
  *
  * Add features
  * Calculations
