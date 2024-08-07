@@ -1,43 +1,62 @@
 ﻿using System;
+using Console.Extensions;
+using Console.Interfaces;
+using Console.Models;
 using Core.Common.Enums;
 using Core.Common.Interfaces.Application;
 
 namespace Console.Menu;
 
-public class StartMenu
+public class StartMenu : IStartMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
     public StartMenu(IFinancialAnalyzerService analyzer)
     {
         _analyzer = analyzer;
     }
+    public UserAction Next()
+    {
+        throw new NotImplementedException();
+    }
+
+    public UserAction Show()
+    {
+        Run();
+        return new UserAction()
+        {
+            KeyPressed = ReadKey().Key,
+            ShouldContinue = false
+        };
+    }
 
     public void Run()
     {
-        System.Console.WriteLine("START MENU \n\nPress a number \n ");
-        System.Console.WriteLine(" 1 - Overview \n 2 - Assets \n 3 - Analysis \n 4 - Transactions \n");
+       
         
         var shouldContinue = true;
         while (shouldContinue)
         {
-            var key = System.Console.ReadKey();
             System.Console.Clear();
-            var clicked = key.Key;
+            System.Console.WriteLine("START MENU \n\nPress a number \n ");
 
-            shouldContinue = clicked switch
+            var menu = new List<MenuItem>()
             {
-                ConsoleKey.None => DoNothing(),
-                ConsoleKey.D1 => ShowOverview(),
-                ConsoleKey.D2 => ShowAssets(),
-                ConsoleKey.D3 => ShowAnalysis(),
-                ConsoleKey.D4 => ShowTransactions(),
-                _ => DoNothing()
+                new(1, "Overview", ShowOverview),
+                new(2, "Assets", ShowAssets),
+                new(3, "Analysis", ShowAnalysis),
+                new(4, "Transactions", ShowTransactions),
             };
-
+            menu.Print();
+            var key = ReadKey();
+            menu.Goto(key);
+            
+            // TODO add function to continue
         }
     }
 
     public bool DoNothing() => true;
+
+    private static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
 
     public bool ShowOverview()
     {
@@ -49,6 +68,7 @@ public class StartMenu
     public bool ShowAssets()
     {
         System.Console.WriteLine("ASSETS \n");
+
         _analyzer.Get(AnalysisCalculationType.ProfitOrLoss).PrintToConsole();
         // Print stocks
         //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
@@ -66,7 +86,7 @@ public class StartMenu
         _analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
         System.Console.WriteLine("\n Click any key to return");
-        System.Console.ReadKey();
+        ReadKey();
         return true;
     }
 
@@ -75,11 +95,7 @@ public class StartMenu
         System.Console.WriteLine("TRANSACTIONS \n");
 
         System.Console.WriteLine("404 - Work in progress \n");
-        return false;
+        return true;
     }
-}
-
-public class UserAction
-{
 
 }
