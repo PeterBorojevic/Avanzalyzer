@@ -6,7 +6,7 @@ using System.Globalization;
 using Core.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories;
-
+// TODO Move filepath suffixes to Options classes and dependency injection
 public class AvanzaRepository : IAvanzaRepository
 {
     private readonly IAccountParser _accountParser;
@@ -56,7 +56,7 @@ public class AvanzaRepository : IAvanzaRepository
     
     public List<Transaction> LoadTransactions()
     {
-        var fileName = "transaktioner_2017-09-25_2024-08-02.csv";
+        const string fileName = "transaktioner_2017-09-25_2024-08-06.csv";
         var filePath = Path.GetFullPath(Path.Combine(_solutionRoot, "..", "..", "..", "..", "..", "data", fileName));
         var transactions = _transactionParser.ParseAccounts(filePath);
 

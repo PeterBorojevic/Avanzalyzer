@@ -2,7 +2,6 @@
 using Core.Common.Interfaces;
 using Core.Common.Interfaces.Application;
 using Core.Interfaces.Repositories;
-using Core.Models.Dtos;
 using Core.Models.Dtos.Export;
 
 namespace Application.Features;
@@ -22,9 +21,10 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
         return type switch
         {
             AnalysisCalculationType.Dividends => GetDividends(),
+            AnalysisCalculationType.DepositsAndWithdrawals => GetDepositsAndWithdrawals(),
             AnalysisCalculationType.AccountTotals => GetAccountTotals(),
             AnalysisCalculationType.DistributionOfSecurities => GetDistributionOfSecurities(),
-            AnalysisCalculationType.SectoralBreakdown => GetDistributionOfSecurities(),
+            AnalysisCalculationType.SectoralBreakdown => throw new NotImplementedException(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -50,16 +50,19 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
         return new DepositsAndWithdrawals(depositsAndWithdrawals);
     }
 
-    public IPrintable GetDistributionOfSecurities()
-    {
-        return new DistributionOfSecurities();
-    }
-
     public IPrintable GetAccountTotals()
     {
         var portfolio = _avanzaRepository.LoadPortfolioData();
         return new AccountTotals(portfolio);
     }
+
+    public IPrintable GetDistributionOfSecurities()
+    {
+        var portfolio = _avanzaRepository.LoadPortfolioData();
+        return new DistributionOfSecurities(portfolio);
+    }
+
+    
 
     // Analyze transactions
     /*

@@ -4,6 +4,7 @@ public enum AnalysisCalculationType
 {
     // Savings
     Dividends,
+    DepositsAndWithdrawals,
     AccountTotals,
     // Analysis
     DistributionOfSecurities,

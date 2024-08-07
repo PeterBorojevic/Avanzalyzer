@@ -20,9 +20,11 @@ class Program
 
         analyzer.GetDividends(GroupingType.ByYear).PrintToConsole();
 
-        analyzer.GetAccountTotals().PrintToConsole();
+        analyzer.Get(AnalysisCalculationType.AccountTotals).PrintToConsole();
 
-        analyzer.GetDepositsAndWithdrawals().PrintToConsole();
+        analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
+
+        analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
         //var portfolio = portfolioRepository.LoadPortfolioData();
         //var totals = new AccountTotals(portfolio);
         //totals.PrintToConsole();
