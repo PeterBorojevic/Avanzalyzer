@@ -1,4 +1,6 @@
 ﻿using Application;
+using Console;
+using Console.Interfaces;
 using Console.Menu;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,12 +12,12 @@ class Program
         var serviceProvider = new ServiceCollection()
             .AddRepositories()
             .AddFeatures()
-            .AddSingleton<StartMenu>()
+            .AddMenues()
             .BuildServiceProvider();
         
-        var menu = serviceProvider.GetService<StartMenu>();
+        var menu = serviceProvider.GetService<IStartMenu>();
 
-        menu.Run();
+        _ = menu.Run();
     }
 }
 
@@ -30,6 +32,8 @@ class Program
  *
  * Add features
  * Calculations
+ * Dividend yield
+ *
  * Totals
  * Forecasted savings
  * Fetch ticker stock prices

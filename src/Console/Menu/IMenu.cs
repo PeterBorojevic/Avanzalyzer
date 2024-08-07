@@ -9,6 +9,6 @@ public interface IMenu
     /// <summary>
     /// Presents the menu to the console
     /// </summary>
-    /// <returns></returns>
-    UserAction Show();
+    /// <returns>true to continue, otherwise false</returns>
+    bool Run();
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using Console.Extensions;
-using Console.Interfaces;
+﻿using Console.Interfaces;
 using Console.Models;
 using Core.Common.Enums;
 using Core.Common.Interfaces.Application;
@@ -10,29 +8,19 @@ namespace Console.Menu;
 public class StartMenu : IStartMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
-    public StartMenu(IFinancialAnalyzerService analyzer)
+    private readonly IAssetMenu _assetMenu;
+    public StartMenu(IFinancialAnalyzerService analyzer, IAssetMenu assetMenu)
     {
         _analyzer = analyzer;
+        _assetMenu = assetMenu;
     }
     public UserAction Next()
     {
         throw new NotImplementedException();
     }
 
-    public UserAction Show()
+    public bool Run()
     {
-        Run();
-        return new UserAction()
-        {
-            KeyPressed = ReadKey().Key,
-            ShouldContinue = false
-        };
-    }
-
-    public void Run()
-    {
-       
-        
         var shouldContinue = true;
         while (shouldContinue)
         {
@@ -47,6 +35,8 @@ public class StartMenu : IStartMenu
             
             // TODO add function to continue
         }
+
+        return false;
     }
 
     public bool DoNothing() => true;
@@ -69,15 +59,7 @@ public class StartMenu : IStartMenu
 
     public bool ShowAssets()
     {
-        System.Console.WriteLine("ASSETS \n");
-
-        _analyzer.Get(AnalysisCalculationType.ProfitOrLoss).PrintToConsole();
-        // Print stocks
-        //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
-        //portfolio.Assets.PrintProfitOrLoss();
-        //portfolio.Print(AssetType.Etf);
-        //portfolio.Select(AssetType.Fund).PrintProfitOrLoss();
-        //portfolio.Select(AssetType.Stock).PrintProfitOrLoss();
+        _assetMenu.Run();
         return PressAnyKeyToReturn();
     }
 

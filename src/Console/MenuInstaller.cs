@@ -8,7 +8,7 @@ public static class MenuInstaller
 {
     public static IServiceCollection AddMenues(this IServiceCollection services)
     {
-        services.AddTransient<IStartMenu, StartMenu>();
+        services.AddSingleton<IStartMenu, StartMenu>();
         services.AddTransient<IAssetMenu, AssetsMenu>();
 
         return services;
