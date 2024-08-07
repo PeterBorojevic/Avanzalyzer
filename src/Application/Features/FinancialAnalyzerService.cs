@@ -25,8 +25,15 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
             AnalysisCalculationType.AccountTotals => GetAccountTotals(),
             AnalysisCalculationType.DistributionOfSecurities => GetDistributionOfSecurities(),
             AnalysisCalculationType.SectoralBreakdown => throw new NotImplementedException(),
+            AnalysisCalculationType.ProfitOrLoss => GetProfitOrLoss(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
+    }
+
+    public IPrintable GetProfitOrLoss()
+    {
+        var portfolio = _avanzaRepository.LoadPortfolioData();
+        return new ProfitOrLoss(portfolio);
     }
 
     public IPrintable GetDividends(GroupingType groupBy = GroupingType.ByYear)

@@ -1,10 +1,6 @@
 ﻿using Application;
-using Core.Common.Enums;
-using Core.Common.Interfaces.Application;
-using Core.Interfaces.Repositories;
-using Core.Models.Dtos;
+using Console.Menu;
 using Infrastructure;
-using Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 class Program
@@ -14,30 +10,12 @@ class Program
         var serviceProvider = new ServiceCollection()
             .AddRepositories()
             .AddFeatures()
+            .AddSingleton<StartMenu>()
             .BuildServiceProvider();
         
-        var analyzer = serviceProvider.GetService<IFinancialAnalyzerService>();
+        var menu = serviceProvider.GetService<StartMenu>();
 
-        analyzer.GetDividends(GroupingType.ByYear).PrintToConsole();
-
-        analyzer.Get(AnalysisCalculationType.AccountTotals).PrintToConsole();
-
-        analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
-
-        analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
-        //var portfolio = portfolioRepository.LoadPortfolioData();
-        //var totals = new AccountTotals(portfolio);
-        //totals.PrintToConsole();
-
-        //var transactions = portfolioRepository.LoadTransactions();
-
-        // Print stocks
-        //portfolio.Select(AssetType.Etf).PrintProfitOrLoss();
-        //portfolio.Assets.PrintProfitOrLoss();
-        //portfolio.Print(AssetType.Etf);
-        //portfolio.Select(AssetType.Fund).PrintProfitOrLoss();
-        //portfolio.Select(AssetType.Stock).PrintProfitOrLoss();
-
+        menu.Run();
     }
 }
 

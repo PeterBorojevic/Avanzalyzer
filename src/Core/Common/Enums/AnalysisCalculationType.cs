@@ -11,5 +11,6 @@ public enum AnalysisCalculationType
     /// <summary>
     /// Branschfördelning
     /// </summary>
-    SectoralBreakdown
+    SectoralBreakdown,
+    ProfitOrLoss
 }
