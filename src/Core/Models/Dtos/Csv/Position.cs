@@ -1,4 +1,6 @@
 ﻿using Core.Common.Converters;
+using Core.Models.Securities;
+using Core.Models.Securities.Base;
 using CsvHelper.Configuration.Attributes;
 
 namespace Core.Models.Dtos.Csv;
@@ -55,4 +57,13 @@ public class Position
     [Ignore] public decimal ProfitOrLoss => MarketValue - AcquisitionCost;
     [Ignore] public decimal PercentageChange => decimal.Divide(MarketValue, AcquisitionCost) - 1;
     [Ignore] public decimal AssetValue => decimal.Divide(MarketValue, Quantity);
+
+    public Asset ToAsset() => Type switch
+    {
+        "STOCK" => new Stock(this),
+        "FUND" => new Fund(this),
+        "EXCHANGE_TRADED_FUND" => new ExchangeTradedFund(this),
+        "CERTIFICATE" => new Certificate(this),
+        _ => throw new ArgumentOutOfRangeException()
+    };
 }

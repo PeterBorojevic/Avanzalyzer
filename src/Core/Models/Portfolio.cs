@@ -2,7 +2,6 @@
 using Core.Common.Enums;
 using Core.Extensions;
 using Core.Models.Dtos.Csv;
-using Core.Models.Securities;
 using Core.Models.Securities.Base;
 
 namespace Core.Models;
@@ -14,28 +13,12 @@ public class Portfolio
         Assets = assets;
         Accounts = new List<Account>();
     }
-    public Portfolio(IEnumerable<Account> accounts, List<Position> positions)
+    public Portfolio(IEnumerable<Account> accounts, IEnumerable<Position> positions)
     {
         Accounts = accounts.Where(a => a.Balance != decimal.Zero).ToList();
-        Assets = new List<Asset>(ConvertPositionsToAssets(positions));
+        Assets = positions.Select(p => p.ToAsset()).ToList();
     }
-
-    private static IEnumerable<Asset> ConvertPositionsToAssets(List<Position> positions)
-    {
-        var assets = positions.Select(p =>
-        {
-            return p.Type switch
-            {
-                "STOCK" => new Stock(p) as Asset,
-                "FUND" => new Fund(p),
-                "EXCHANGE_TRADED_FUND" => new ExchangeTradedFund(p),
-                "CERTIFICATE" => new Certificate(p),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        });
-
-        return assets;
-    }
+    
     public List<Asset> Assets { get; }
     public List<Account> Accounts { get; set; }
 
