@@ -20,7 +20,7 @@ public static class ConsoleKeyExtensions
             ConsoleKey.D5 => 5,
             ConsoleKey.NumPad5 => 5,
             ConsoleKey.D6 => 6,
-            ConsoleKey.NumPad6 => 2,
+            ConsoleKey.NumPad6 => 6,
             ConsoleKey.D7 => 7,
             ConsoleKey.NumPad7 => 7,
             ConsoleKey.D8 => 8,

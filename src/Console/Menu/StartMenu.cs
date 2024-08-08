@@ -59,14 +59,13 @@ public class StartMenu : IStartMenu
 
     public bool ShowAssets()
     {
-        _assetMenu.Run();
-        return PressAnyKeyToReturn();
+        return _assetMenu.Run();
     }
 
     public bool ShowAnalysis()
     {
         System.Console.WriteLine("ANALYSIS \n");
-        _analyzer.GetDividends(GroupingType.ByYear).PrintToConsole();
+        _analyzer.Get(AnalysisCalculationType.Dividends).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
 

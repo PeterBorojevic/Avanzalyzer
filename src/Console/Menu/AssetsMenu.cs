@@ -5,6 +5,7 @@ using Core.Common.Interfaces.Application;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
 using Core.Models;
+using Core.Models.Settings;
 
 namespace Console.Menu;
 
@@ -31,6 +32,7 @@ public class AssetsMenu : IAssetMenu
         while (shouldContinue)
         {
             var menu = new NumberedMenu("ASSETS \n\nPress a number \n ",
+                new MenuItem(0, "Return", Return),
                 new MenuItem(1, "Profit or loss", OnClick: () => ShowProfitOrLoss(portfolio)),
                 new MenuItem(2, "Show stocks", () => ShowAsset(AssetType.Stock, portfolio)),
                 new MenuItem(3, "Show funds", () => ShowAsset(AssetType.Fund, portfolio)),
@@ -43,9 +45,11 @@ public class AssetsMenu : IAssetMenu
         return true;
     }
 
+    private bool Return() => false;
+
     private bool ShowProfitOrLoss(Portfolio portfolio)
     {
-        _analyzer.Get(AnalysisCalculationType.ProfitOrLoss).PrintToConsole();
+        _analyzer.Get(AnalysisCalculationType.ProfitOrLoss, options => options.UseTransactions = true).PrintToConsole();
         portfolio.Print();
         return PressAnyKeyToReturn();
     }

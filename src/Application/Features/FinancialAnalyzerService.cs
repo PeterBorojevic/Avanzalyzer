@@ -1,8 +1,12 @@
 ﻿using Core.Common.Enums;
 using Core.Common.Interfaces;
 using Core.Common.Interfaces.Application;
+using Core.Extensions;
 using Core.Interfaces.Repositories;
+using Core.Models;
+using Core.Models.Data;
 using Core.Models.Dtos.Export;
+using Core.Models.Settings;
 
 namespace Application.Features;
 
@@ -13,42 +17,46 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
     public FinancialAnalyzerService(IAvanzaRepository avanzaRepository)
     {
         _avanzaRepository = avanzaRepository;
-
     }
 
-    public IPrintable Get(AnalysisCalculationType type)
+    public IPrintable Get(AnalysisCalculationType type, Portfolio? portfolio = null, List<Transaction>? transactions = null)
     {
         return type switch
         {
-            AnalysisCalculationType.Dividends => GetDividends(),
+            AnalysisCalculationType.Dividends => GetDividends(GroupingType.ByYear, transactions),
             AnalysisCalculationType.DepositsAndWithdrawals => GetDepositsAndWithdrawals(),
             AnalysisCalculationType.AccountTotals => GetAccountTotals(),
             AnalysisCalculationType.DistributionOfSecurities => GetDistributionOfSecurities(),
             AnalysisCalculationType.SectoralBreakdown => throw new NotImplementedException(),
-            AnalysisCalculationType.ProfitOrLoss => GetProfitOrLoss(),
+            AnalysisCalculationType.ProfitOrLoss => GetProfitOrLoss(portfolio, transactions),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
 
-    public IPrintable GetProfitOrLoss()
+    public IPrintable Get(AnalysisCalculationType type, Action<FinancialAnalysisOptions> options)
     {
-        var portfolio = _avanzaRepository.LoadPortfolioData();
-        return new ProfitOrLoss(portfolio);
+        var settings = new FinancialAnalysisOptions();
+        options.Invoke(settings);
+        var transactions = settings.UseTransactions ? _avanzaRepository.LoadTransactions() : null;
+
+        return Get(type, null, transactions);
     }
 
-    public IPrintable GetDividends(GroupingType groupBy = GroupingType.ByYear)
+    private IPrintable GetProfitOrLoss(Portfolio? portfolio, List<Transaction>? transactions = null)
     {
-        var transactions = _avanzaRepository.LoadTransactions();
-        var dividends = transactions.Where(t =>
-            t.TransactionType is 
-                TransactionType.Dividend or 
-                TransactionType.DividendProvisionalTax or 
-                TransactionType.ForeignTax);
+        portfolio ??= _avanzaRepository.LoadPortfolioData();
+        return new ProfitOrLoss(portfolio, transactions.SelectDividendRelatedTransactions());
+    }
+
+    private IPrintable GetDividends(GroupingType groupBy = GroupingType.ByYear, List<Transaction>? transactions = null)
+    {
+        transactions ??= _avanzaRepository.LoadTransactions();
+        var dividends = transactions.SelectDividendRelatedTransactions();
 
         return new DividendsOverTime(dividends, shouldGroupByYear: groupBy is GroupingType.ByYear);
     }
 
-    public IPrintable GetDepositsAndWithdrawals()
+    private IPrintable GetDepositsAndWithdrawals()
     {
         var transactions = _avanzaRepository.LoadTransactions();
         var depositsAndWithdrawals = transactions.Where(t =>
@@ -57,13 +65,13 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
         return new DepositsAndWithdrawals(depositsAndWithdrawals);
     }
 
-    public IPrintable GetAccountTotals()
+    private IPrintable GetAccountTotals()
     {
         var portfolio = _avanzaRepository.LoadPortfolioData();
         return new AccountTotals(portfolio);
     }
 
-    public IPrintable GetDistributionOfSecurities()
+    private IPrintable GetDistributionOfSecurities()
     {
         var portfolio = _avanzaRepository.LoadPortfolioData();
         return new DistributionOfSecurities(portfolio);

@@ -7,6 +7,11 @@ public class Account
     [Name("Bank")]
     [Optional]
     public string Bank { get; set; }
+
+    [Name("Kontonamn")]
+    [Optional]
+    public string AccountName { get; set; }
+
     [Name("Kontonummer")]
     public string AccountNumber { get; set; }
     [Name("Kontotyp")]
