@@ -7,4 +7,5 @@ public interface IAvanzaRepository
 {
     Portfolio LoadPortfolioData();
     List<Transaction> LoadTransactions();
+    decimal GetAssetMarketValue(string assetName);
 }

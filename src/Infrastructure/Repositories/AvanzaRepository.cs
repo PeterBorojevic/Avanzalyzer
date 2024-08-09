@@ -15,6 +15,7 @@ public class AvanzaRepository : IAvanzaRepository
     private readonly string _solutionRoot;
     private const string AccountFileSuffix = "_konto.csv";
     private const string PositionFileSuffix = "_positioner.csv";
+    private readonly Dictionary<string, decimal> _assetValue = new();
 
     public AvanzaRepository(IAccountParser accountParser, IPositionParser positionParser, ITransactionParser transactionParser)
     {
@@ -64,9 +65,21 @@ public class AvanzaRepository : IAvanzaRepository
     }
 
     //TODO extract market value of each asset type,
-    //TODO store in a format that can be queried
+    //TODO store in a format that can be queried. For now dictionary
     public void LoadPortfolioAssetsMarketValue()
     {
-
+        var portfolio = LoadPortfolioData();
+        foreach (var asset in portfolio.Assets)
+        {
+            var name = asset.Name;
+            var marketValuePerUnit = decimal.Divide(asset.MarketValue, asset.Quantity);
+            _assetValue.Add(name, marketValuePerUnit);
+        }
     }
+
+    public decimal GetAssetMarketValue(string assetName)
+    {
+        if (!_assetValue.Any()) LoadPortfolioAssetsMarketValue();
+        return _assetValue.ContainsKey(assetName) ? _assetValue[assetName] : 0;
+    } 
 }

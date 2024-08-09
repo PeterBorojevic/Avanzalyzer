@@ -56,6 +56,7 @@ public class PortfolioAnalyzerService : IPortfolioAnalyzerService
         var portfolio = _avanzaRepository.LoadPortfolioData();
         // TODO account for assets being moved between accounts
         // Maybe instead of using the portfolio, count the assets and use a repository for asset values
+
         foreach (var tradedAssets in tradedAssetsPerAccount)
         {
             var accountName = tradedAssets.Key;
