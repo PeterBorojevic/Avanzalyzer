@@ -1,18 +1,17 @@
 ﻿using Core.Common.ConsoleTables.v1;
-using Core.Common.Enums;
 using Core.Common.Interfaces;
 using Core.Models.Data;
 using Core.Models.Securities.Base;
 
 namespace Core.Models.Dtos.Export;
 
-public class ProfitOrLoss : IPrintable
+public class ReturnOfInvestment
 {
     private readonly List<Asset> _assets;
     private readonly IEnumerable<Transaction>? _dividends;
     private readonly Portfolio _portfolio;
 
-    public ProfitOrLoss(Portfolio portfolio, IEnumerable<Transaction>? dividends = null)
+    public ReturnOfInvestment(Portfolio portfolio, IEnumerable<Transaction>? dividends = null)
     {
         _dividends = dividends;
         _assets = portfolio.Assets;
@@ -23,24 +22,11 @@ public class ProfitOrLoss : IPrintable
     {
         var columnInColors = new List<ColumnInColor>()
         {
-            new("Namn"),
-            new("Värde", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
+            new("Name"),
+            new("MarketValue", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
                 .And(ColorFunctions.ValuesBelow(1000, ConsoleColor.DarkBlue))),
-            new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
-            new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
-        };
-        return new ConsoleTable(columnInColors);
-    }
-    
-    private static ConsoleTable CreateTableWithDividends()
-    {
-        var columnInColors = new List<ColumnInColor>()
-        {
-            new("Namn"),
-            new("Värde", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
-                .And(ColorFunctions.ValuesBelow(1000, ConsoleColor.DarkBlue))),
-            new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
-            new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
+            new("Net gain [kr]", ConsoleColorFunctions.PositiveOrNegative),
+            new("Net yield [%]", ConsoleColorFunctions.Percentage),
             new("Utdelningar [kr]", cell => ConsoleColor.Green),
             new("ROI [%]", ConsoleColorFunctions.Percentage),
         };
@@ -49,7 +35,7 @@ public class ProfitOrLoss : IPrintable
 
     public void PrintToConsole()
     {
-        var table = _dividends is null ? CreateTable() : CreateTableWithDividends();
+        var table = CreateTable();
         // Add each value
         foreach (var position in _assets.OrderByDescending(p => p.MarketValue))
         {
@@ -79,5 +65,4 @@ public class ProfitOrLoss : IPrintable
 
         return row.ToArray();
     }
-    
 }

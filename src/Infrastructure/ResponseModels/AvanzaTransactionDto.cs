@@ -57,8 +57,8 @@ public class AvanzaTransactionDto
         {
             "Insättning" => Core.Common.Enums.TransactionType.Deposit, 
             "Uttag" => Core.Common.Enums.TransactionType.Withdraw,
-            "Köp" => Core.Common.Enums.TransactionType.BuySell,
-            "Sälj" => Core.Common.Enums.TransactionType.BuySell,
+            "Köp" => Core.Common.Enums.TransactionType.Buy,
+            "Sälj" => Core.Common.Enums.TransactionType.Sell,
             "Utdelning" => Core.Common.Enums.TransactionType.Dividend,
             "Ränta" => Core.Common.Enums.TransactionType.Interest,
             "Utländsk källskatt" => Core.Common.Enums.TransactionType.ForeignTax,

@@ -9,6 +9,7 @@ public static class ServiceInstaller
     public static IServiceCollection AddFeatures(this IServiceCollection services)
     {
         services.AddTransient<IFinancialAnalyzerService, FinancialAnalyzerService>();
+        services.AddTransient<IPortfolioAnalyzerService, PortfolioAnalyzerService>();
 
         return services;
     }

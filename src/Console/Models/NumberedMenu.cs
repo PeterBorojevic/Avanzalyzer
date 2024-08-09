@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Core.Common.ConsoleTables;
+using Core.Common.ConsoleTables.v1;
 
 namespace Console.Models;
 
@@ -21,15 +23,17 @@ public class NumberedMenu
     public void Display(bool shouldClear = true)
     {
         if (shouldClear) System.Console.Clear();
-        System.Console.WriteLine(Header);
+        ExtendedConsole.WriteLine($" {Header:yellow} \n ");
         var sb = new StringBuilder();
         foreach (var menuItem in Items)
         {
-            sb.Append(menuItem.Id);
-            sb.Append(" - ");
-            sb.Append(menuItem.Text);
-            sb.Append(" \n");
+            sb.Append(' ');
+            sb.Append(menuItem.Id).Append(" - ").Append(menuItem.Text);
+            sb.Append('\n');
         }
+        
+
+        sb.Append("\n Select number...");
         System.Console.WriteLine(sb.ToString());
     }
 

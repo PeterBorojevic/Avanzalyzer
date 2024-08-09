@@ -24,7 +24,7 @@ public class StartMenu : IStartMenu
         var shouldContinue = true;
         while (shouldContinue)
         {
-            var menu = new NumberedMenu("START MENU \n\nPress a number \n ",
+            var menu = new NumberedMenu("START MENU",
                 new MenuItem(1, "Overview", OnClick: ShowOverview),
                 new MenuItem(2, "Assets", ShowAssets),
                 new MenuItem(3, "Analysis", ShowAnalysis),

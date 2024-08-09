@@ -14,9 +14,13 @@ public enum TransactionType
     /// </summary>
     Withdraw,
     /// <summary>
-    /// Köp/Sälj
+    /// Köp
     /// </summary>
-    BuySell,
+    Buy,
+    /// <summary>
+    /// Sälj
+    /// </summary>
+    Sell,
     /// <summary>
     /// Utdelning
     /// </summary>

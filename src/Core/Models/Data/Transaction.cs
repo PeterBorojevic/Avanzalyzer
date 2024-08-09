@@ -1,5 +1,4 @@
 ﻿using Core.Common.Enums;
-using CsvHelper.Configuration.Attributes;
 
 namespace Core.Models.Data;
 

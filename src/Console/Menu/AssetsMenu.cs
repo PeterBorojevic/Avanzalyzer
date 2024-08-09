@@ -13,11 +13,13 @@ public class AssetsMenu : IAssetMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
     private readonly IAvanzaRepository _repository;
+    private readonly IPortfolioAnalyzerService _portfolioAnalyzer;
 
-    public AssetsMenu(IFinancialAnalyzerService analyzer, IAvanzaRepository repository)
+    public AssetsMenu(IFinancialAnalyzerService analyzer, IAvanzaRepository repository, IPortfolioAnalyzerService portfolioAnalyzer)
     {
         _analyzer = analyzer;
         _repository = repository;
+        _portfolioAnalyzer = portfolioAnalyzer;
     }
 
     public UserAction Next()
@@ -36,7 +38,8 @@ public class AssetsMenu : IAssetMenu
                 new MenuItem(1, "Profit or loss", OnClick: () => ShowProfitOrLoss(portfolio)),
                 new MenuItem(2, "Show stocks", () => ShowAsset(AssetType.Stock, portfolio)),
                 new MenuItem(3, "Show funds", () => ShowAsset(AssetType.Fund, portfolio)),
-                new MenuItem(4, "Show ETFs", () => ShowAsset(AssetType.ExchangeTradedFund, portfolio))
+                new MenuItem(4, "Show ETFs", () => ShowAsset(AssetType.ExchangeTradedFund, portfolio)),
+                new MenuItem(5, "Return of investments", ReturnOfInvestments)
             );
             menu.Display();
             shouldContinue = menu.GotoUserSelection();
@@ -59,6 +62,12 @@ public class AssetsMenu : IAssetMenu
         portfolio.Select(type).PrintProfitOrLoss();
         portfolio.Print(type);
 
+        return PressAnyKeyToReturn();
+    }
+
+    private bool ReturnOfInvestments()
+    {
+        _portfolioAnalyzer.LoadTransactions();
         return PressAnyKeyToReturn();
     }
 

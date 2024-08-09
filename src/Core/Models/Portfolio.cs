@@ -30,6 +30,11 @@ public class Portfolio
         return Assets.Where(a => a.Type == type).ToList();
     }
 
+    public IList<Asset> Select(string accountNumber)
+    {
+        return Assets.Where(a => a.AccountNumber == accountNumber).ToList();
+    }
+
 
     //public IEnumerable<Asset> Get(Account type)
     //TODO Portfolio should not be the printer. We could make an interface that contains a method for extracting printable objects

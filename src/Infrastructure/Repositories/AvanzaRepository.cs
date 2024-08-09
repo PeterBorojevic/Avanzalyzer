@@ -62,4 +62,11 @@ public class AvanzaRepository : IAvanzaRepository
 
         return transactions;
     }
+
+    //TODO extract market value of each asset type,
+    //TODO store in a format that can be queried
+    public void LoadPortfolioAssetsMarketValue()
+    {
+
+    }
 }
