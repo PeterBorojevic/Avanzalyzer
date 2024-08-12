@@ -10,6 +10,7 @@ public static class ServiceInstaller
     {
         services.AddTransient<IFinancialAnalyzerService, FinancialAnalyzerService>();
         services.AddTransient<IPortfolioAnalyzerService, PortfolioAnalyzerService>();
+        services.AddTransient<ITransactionAnalysisService, TransactionAnalysisService>();
 
         return services;
     }

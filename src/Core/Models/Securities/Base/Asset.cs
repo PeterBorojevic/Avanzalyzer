@@ -19,6 +19,11 @@ public abstract class Asset
         Type = assetType;
     }
 
+    protected Asset(AssetType assetType)
+    {
+        Type = assetType;
+    }
+
     /// <summary>
     /// Kontonummer
     /// </summary>

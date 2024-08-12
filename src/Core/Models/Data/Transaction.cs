@@ -1,4 +1,5 @@
-﻿using Core.Common.Enums;
+﻿using System.Text.Json;
+using Core.Common.Enums;
 
 namespace Core.Models.Data;
 
@@ -14,6 +15,9 @@ public class Transaction
     
     public decimal Quantity { get; set; }
     
+    /// <summary>
+    /// The price for the asset, in the currency determined by <see cref="Currency"/>
+    /// </summary>
     public decimal Price { get; set; }
 
     /// <summary>
@@ -24,9 +28,17 @@ public class Transaction
     
     public decimal BrokerageFee { get; set; }
     
+    /// <summary>
+    /// Denotes the currency in which the <see cref="Price"/> is in. 
+    /// </summary>
     public string Currency { get; set; }
     
     public string ISIN { get; set; }
     
     public decimal? Result { get; set; }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
+    }
 }

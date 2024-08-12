@@ -2,6 +2,7 @@
 
 public enum AssetType
 {
+    UnknownAsset,
     Stock,
     Fund,
     ExchangeTradedFund,

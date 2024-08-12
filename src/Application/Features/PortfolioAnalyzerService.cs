@@ -18,14 +18,17 @@ namespace Application.Features;
 public class PortfolioAnalyzerService : IPortfolioAnalyzerService
 {
     private readonly IAvanzaRepository _avanzaRepository;
-    public PortfolioAnalyzerService(IAvanzaRepository avanzaRepository)
+    private readonly ITransactionAnalysisService _transactionAnalysis;
+    public PortfolioAnalyzerService(IAvanzaRepository avanzaRepository, ITransactionAnalysisService transactionAnalysis)
     {
         _avanzaRepository = avanzaRepository;
+        _transactionAnalysis = transactionAnalysis;
     }
 
     public void LoadTransactions()
     {
         var transactions = _avanzaRepository.LoadTransactions();
+        _transactionAnalysis.ParseTransactions(transactions); // Test
         RoiPerAssetTraded(transactions);
 
         var buyOrSell = transactions
