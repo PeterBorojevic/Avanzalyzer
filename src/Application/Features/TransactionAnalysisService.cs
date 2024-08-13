@@ -16,7 +16,11 @@ public class TransactionAnalysisService : ITransactionAnalysisService
     {
         var ordered = transactions.Reverse();
         //var ordered = transactions.OrderBy(t => t.Date);
-        var portfolio = new InvestmentPortfolio();
+        //TODO känt fel, Inbokning av teckningsrätter. Avanza exporterar dessa under transaktionstypen Other (Övrigt). Detta skapar dubletter
+        // Det finns ett mönster för dessa, nytt ISIN, saknar Price, saknar Amount. Endast Quantity och ISIN. Men, andra övriga transaktioner.
+        // Men ignorerar vi det första värdepappret med nytt ISIN och avsaknad av andra värden kommer nästa övrig transaktion uppfylla samma krav.
+        // Krävs att endast den första ignoreras, alt. städas/raderas bort från exceldatat. Det finns ingen annan information under Description som hade kunnat användas.
+        var portfolio = new InvestmentPortfolio(false);
         foreach (var transaction in ordered)
         {
             switch (transaction.TransactionType)
@@ -24,8 +28,6 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                 case TransactionType.Undefined:
                     break;
                 case TransactionType.Options:
-                    break;
-                case TransactionType.Forex:
                     break;
                 case TransactionType.Deposit:
                     portfolio.AddDepositOrWithdrawal(transaction);
@@ -40,15 +42,19 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddSell(transaction);
                     break;
                 case TransactionType.Dividend:
+                    portfolio.AddDividend(transaction);
                     break;
                 case TransactionType.Interest:
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.ForeignTax:
+                    portfolio.AddDividend(transaction);
                     break;
                 case TransactionType.ProvisionalTax:
+                    portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.DividendProvisionalTax:
+                    portfolio.AddDividend(transaction);
                     break;
                 case TransactionType.AssetTransfer:
                     if (ContainsISIN(transaction))
@@ -61,13 +67,13 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                         {
                             case > 0:
                                 portfolio.AddBuy(transaction);
-                                continue;
+                                break;
                             case < 0:
-                                portfolio.AddSell(transaction);
-                                continue;
+                                portfolio.AddSell(transaction, TransactionType.AssetTransfer);
+                                break;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                continue;
+                                break;
                         }
                     }
 
@@ -76,6 +82,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.ShareLoanDisbursement:
+                    portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.Other:
                     if (ContainsISIN(transaction))
@@ -86,20 +93,19 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                         {
                             case > 0:
                                 portfolio.AddBuy(transaction);
-                                continue;
+                                break;
                             case < 0:
                                 portfolio.AddSell(transaction);
-                                continue;
+                                break;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                continue;
+                                break;
                         }
                     }
 
                     // Avgift, avkastningsskatt, riskpremie, överföring ränta kapitalmedelskonto,
                     // moms, tjänster (ex. K4-/K11-underlag), Nollställning av outnyttjad kredit eller blank beskrivning
                     portfolio.AddDepositOrWithdrawal(transaction);
-
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

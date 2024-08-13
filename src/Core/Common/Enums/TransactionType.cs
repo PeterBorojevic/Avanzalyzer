@@ -4,7 +4,6 @@ public enum TransactionType
 {
     Undefined,
     Options,
-    Forex,
     /// <summary>
     /// Insättning
     /// </summary>
@@ -37,5 +36,8 @@ public enum TransactionType
     DividendProvisionalTax,
     AssetTransfer,
     ShareLoanDisbursement,
+    /// <summary>
+    /// Övrigt
+    /// </summary>
     Other
 }

@@ -1,4 +1,5 @@
-﻿using Core.Models.Data;
+﻿using System.Text.RegularExpressions;
+using Core.Models.Data;
 using Core.Common.Enums;
 using CsvHelper.Configuration.Attributes;
 using Core.Common.Converters;
@@ -52,7 +53,7 @@ public class AvanzaTransactionDto
     public Transaction ToInternal() => new Transaction
     {
         Date = Date,
-        AccountName = AccountName,
+        AccountName = Regex.Replace(AccountName, @"\p{Cs}", ""),
         TransactionType = TransactionType switch
         {
             "Insättning" => Core.Common.Enums.TransactionType.Deposit, 
