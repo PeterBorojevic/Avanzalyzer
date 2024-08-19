@@ -1,7 +1,6 @@
 ﻿using Core.Common.Enums;
 using Core.Common.Interfaces.Application;
 using Core.Models.Data;
-using Core.Models.Securities.Base;
 
 namespace Application.Features;
 
@@ -12,15 +11,20 @@ public class TransactionAnalysisService : ITransactionAnalysisService
         
     }
 
-    public void ParseTransactions(IList<Transaction> transactions)
+    public InvestmentPortfolio ParseTransactions(IList<Transaction> transactions, bool verbose = false)
     {
         var ordered = transactions.Reverse();
         //var ordered = transactions.OrderBy(t => t.Date);
         //TODO känt fel, Inbokning av teckningsrätter. Avanza exporterar dessa under transaktionstypen Other (Övrigt). Detta skapar dubletter
         // Det finns ett mönster för dessa, nytt ISIN, saknar Price, saknar Amount. Endast Quantity och ISIN. Men, andra övriga transaktioner.
         // Men ignorerar vi det första värdepappret med nytt ISIN och avsaknad av andra värden kommer nästa övrig transaktion uppfylla samma krav.
-        // Krävs att endast den första ignoreras, alt. städas/raderas bort från exceldatat. Det finns ingen annan information under Description som hade kunnat användas.
-        var portfolio = new InvestmentPortfolio(false);
+        
+        // Vi bör ignorera dessa unika transaktioner om
+        // 1. Vi har ett ISIN men det är nytt
+        // 2. Transaktionen innehåller endast Quantity
+        // 3. Beskrivningen innehåller "BTA".
+        var portfolio = new InvestmentPortfolio(verbose);
+        var sum = transactions.Sum(t => t.Amount);
         foreach (var transaction in ordered)
         {
             switch (transaction.TransactionType)
@@ -67,13 +71,13 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                         {
                             case > 0:
                                 portfolio.AddBuy(transaction);
-                                break;
+                                continue;
                             case < 0:
                                 portfolio.AddSell(transaction, TransactionType.AssetTransfer);
-                                break;
+                                continue;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                break;
+                                continue;
                         }
                     }
 
@@ -93,15 +97,16 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                         {
                             case > 0:
                                 portfolio.AddBuy(transaction);
-                                break;
+                                continue;
                             case < 0:
                                 portfolio.AddSell(transaction);
-                                break;
+                                continue;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                break;
+                                continue;
                         }
                     }
+                    
 
                     // Avgift, avkastningsskatt, riskpremie, överföring ränta kapitalmedelskonto,
                     // moms, tjänster (ex. K4-/K11-underlag), Nollställning av outnyttjad kredit eller blank beskrivning
@@ -112,6 +117,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
             }
         }
 
+        return portfolio;
     }
 
     private bool ContainsISIN(Transaction transaction)

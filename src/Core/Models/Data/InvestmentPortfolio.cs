@@ -1,12 +1,8 @@
-﻿using Core.Models.Securities.Base;
-using System.Transactions;
+﻿using Core.Common.ConsoleTables;
 using Core.Common.Enums;
 using Core.Models.Securities;
-using System.Data.Common;
+using Core.Models.Securities.Base;
 using System.Text;
-using System.Text.Json;
-using Core.Common.ConsoleTables;
-using System.Drawing;
 
 namespace Core.Models.Data;
 
@@ -54,8 +50,18 @@ public class InvestmentPortfolio
             };
             _accountHoldings[transaction.AccountName].Add(newAsset);
         }
+        UpdateBalance(transaction);
+    }
+
+    public void UpdateBalance(Transaction transaction)
+    {
         _accountBalance[transaction.AccountName] += transaction.Amount;
         LogBalance(transaction);
+    }
+
+    public void AddAsset()
+    {
+        // TODO ignore BTA
     }
 
     private static decimal CalculateNewAverageAcquisitionCost(Asset existingAsset, Transaction transaction)
@@ -75,6 +81,7 @@ public class InvestmentPortfolio
             .FirstOrDefault(a => a.ISIN == transaction.ISIN);
         if (_verbose) ExtendedConsole.Write($"Sell {transaction.Quantity.ToString("##")} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):green}");
 
+        UpdateBalance(transaction);
         if (existingAsset == null) return;
 
         existingAsset.Quantity += transaction.Quantity;
@@ -89,8 +96,6 @@ public class InvestmentPortfolio
             var valueOfTrade = transaction.Quantity * transaction.Price;
             //_accountBalance[transaction.AccountName] += valueOfTrade;
         }
-        _accountBalance[transaction.AccountName] += transaction.Amount;
-        LogBalance(transaction);
     }
 
     private void LogBalance(Transaction transaction)
@@ -98,7 +103,7 @@ public class InvestmentPortfolio
         if (_verbose)
         {
             //ExtendedConsole.Write($"\t\t | Account balance {transaction.AccountName:yellow}: {_accountBalance[transaction.AccountName].ToString("C"):green} \n");
-            ExtendedConsole.Write($"\n{$"{" > Account balance",18}"} {$"{transaction.AccountName,38}":yellow}: {$"{_accountBalance[transaction.AccountName],16:C}":green} \n");
+            ExtendedConsole.Write($"\n{$"{" > Account balance",18}"} {$"{transaction.AccountName,38}":white}: {$"{_accountBalance[transaction.AccountName],14:C}":green} \n");
         }
             
     }
@@ -106,20 +111,14 @@ public class InvestmentPortfolio
     public void AddDepositOrWithdrawal(Transaction transaction)
     {
         AddAccountIfNotSeen(transaction.AccountName);
-        _accountBalance[transaction.AccountName] += transaction.Amount;
         if (_verbose)
         {
-            if (transaction.Amount > 0)
-            {
-                //ExtendedConsole.Write($"{"Deposit":cyan} {transaction.AccountName:yellow}: {transaction.Amount.ToString("C"):green}");
+            if (transaction.Amount > 0) 
                 ExtendedConsole.Write($"{"Deposit":cyan} {$"{transaction.AccountName,20}":yellow}:{$"{transaction.Amount:C}":green}");
-            }
-            else
-            {
-                ExtendedConsole.Write($"{"Withdrawal":magenta} {transaction.AccountName:yellow}: {transaction.Amount.ToString("C"):red}");
-            }
+            else 
+                ExtendedConsole.Write($"{"Withdrawal":magenta} {$"{transaction.AccountName,20}":yellow}: {$"{transaction.Amount:C}":red}");
         }
-        LogBalance(transaction);
+        UpdateBalance(transaction);
     }
 
     public void AddDividend(Transaction transaction)

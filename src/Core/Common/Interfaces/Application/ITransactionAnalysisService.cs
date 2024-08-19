@@ -4,5 +4,5 @@ namespace Core.Common.Interfaces.Application;
 
 public interface ITransactionAnalysisService
 {
-    void ParseTransactions(IList<Transaction> transactions);
+    InvestmentPortfolio ParseTransactions(IList<Transaction> transactions, bool verbose = false);
 }

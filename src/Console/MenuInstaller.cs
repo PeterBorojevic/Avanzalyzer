@@ -10,6 +10,7 @@ public static class MenuInstaller
     {
         services.AddSingleton<IStartMenu, StartMenu>();
         services.AddTransient<IAssetMenu, AssetsMenu>();
+        services.AddTransient<ITransactionsMenu, TransactionsMenu>();
 
         return services;
     }

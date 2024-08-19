@@ -28,7 +28,7 @@ public class PortfolioAnalyzerService : IPortfolioAnalyzerService
     public void LoadTransactions()
     {
         var transactions = _avanzaRepository.LoadTransactions();
-        _transactionAnalysis.ParseTransactions(transactions); // Test
+        var portfolio = _transactionAnalysis.ParseTransactions(transactions, verbose: true); // Test
         RoiPerAssetTraded(transactions);
 
         var buyOrSell = transactions
