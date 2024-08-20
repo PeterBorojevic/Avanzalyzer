@@ -2,7 +2,7 @@
 
 public abstract class Menu
 {
-    public static bool PressAnyKeyToReturn
+    internal static bool PressAnyKeyToReturn
     {
         get
         {
@@ -12,5 +12,7 @@ public abstract class Menu
         }
     }
 
-    private static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
+    internal static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
+
+    internal bool Return() => false;
 }

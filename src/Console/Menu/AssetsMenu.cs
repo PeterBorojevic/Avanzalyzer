@@ -46,7 +46,7 @@ public class AssetsMenu : Base.Menu, IAssetMenu
         return true;
     }
 
-    private bool Return() => false;
+    
 
     private bool ShowProfitOrLoss(Portfolio portfolio)
     {

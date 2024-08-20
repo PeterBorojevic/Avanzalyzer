@@ -50,6 +50,31 @@ public static class AssetExtensions
         // Print
         table.Write(format: Format.Color);
     }
+
+    public static void PrintProfitOrLoss(this Asset asset)
+    {
+        // Header and color setup TODO refactor
+        var columnInColors = new List<ColumnInColor>()
+        {
+            new("Namn"),
+            new("Värde", ColorFunctions.ValuesAbove(1000, ConsoleColor.Blue)
+                .And(ColorFunctions.ValuesBelow(1000, ConsoleColor.DarkBlue))),
+            new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
+            new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
+        };
+        var table = new ConsoleTable(columnInColors);
+        // Add each value
+        
+        table.AddRow(
+            $"{asset.Name}",
+            $"{asset.MarketValue:##}",
+            $"{asset.ProfitOrLoss:##}",
+            $"{asset.PercentageChange:P}"
+        );
+        
+        // Print
+        table.Write(format: Format.Color);
+    }
 }
 
 public static class StringExtensions

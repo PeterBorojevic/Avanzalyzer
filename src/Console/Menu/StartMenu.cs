@@ -9,10 +9,12 @@ public class StartMenu : Base.Menu, IStartMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
     private readonly IAssetMenu _assetMenu;
-    public StartMenu(IFinancialAnalyzerService analyzer, IAssetMenu assetMenu)
+    private readonly ITransactionsMenu _transactionsMenu;
+    public StartMenu(IFinancialAnalyzerService analyzer, IAssetMenu assetMenu, ITransactionsMenu transactionsMenu)
     {
         _analyzer = analyzer;
         _assetMenu = assetMenu;
+        _transactionsMenu = transactionsMenu;
     }
     public UserAction Next()
     {
@@ -65,10 +67,7 @@ public class StartMenu : Base.Menu, IStartMenu
 
     public bool ShowTransactions()
     {
-        System.Console.WriteLine("TRANSACTIONS \n");
-
-        System.Console.WriteLine("404 - Work in progress \n");
-        return PressAnyKeyToReturn;
+        return _transactionsMenu.Run();
     }
 
 }
