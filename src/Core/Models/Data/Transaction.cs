@@ -22,7 +22,7 @@ public class Transaction
 
     /// <summary>
     /// Total amount for the transaction,
-    /// For eg. asset buys/sells, equal to <seealso cref="Quantity"/> * <seealso cref="Price"/>
+    /// For eg. asset buys/sells, equal to <seealso cref="Quantity"/> * <seealso cref="Price"/> + <see cref="BrokerageFee"/>
     /// </summary>
     public decimal Amount { get; set; }
     
@@ -32,7 +32,10 @@ public class Transaction
     /// Denotes the currency in which the <see cref="Price"/> is in. 
     /// </summary>
     public string Currency { get; set; }
-    
+
+    /// <summary>
+    /// International Securities Identification Number
+    /// </summary>
     public string ISIN { get; set; }
     
     public decimal? Result { get; set; }
@@ -40,5 +43,22 @@ public class Transaction
     public override string ToString()
     {
         return JsonSerializer.Serialize(this);
+    }
+
+    public bool ContainsISIN()
+    {
+        return !string.IsNullOrEmpty(ISIN);
+    }
+
+    public bool IsBTA()
+    {
+        return AssetNameOrDescription.Contains("BTA");
+    }
+
+    public bool ContainsOnlyQuantity()
+    {
+        return Price is decimal.Zero 
+               && Amount is decimal.Zero 
+               && BrokerageFee is decimal.Zero;
     }
 }

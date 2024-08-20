@@ -14,17 +14,9 @@ public class TransactionAnalysisService : ITransactionAnalysisService
     public InvestmentPortfolio ParseTransactions(IList<Transaction> transactions, bool verbose = false)
     {
         var ordered = transactions.Reverse();
-        //var ordered = transactions.OrderBy(t => t.Date);
-        //TODO känt fel, Inbokning av teckningsrätter. Avanza exporterar dessa under transaktionstypen Other (Övrigt). Detta skapar dubletter
-        // Det finns ett mönster för dessa, nytt ISIN, saknar Price, saknar Amount. Endast Quantity och ISIN. Men, andra övriga transaktioner.
-        // Men ignorerar vi det första värdepappret med nytt ISIN och avsaknad av andra värden kommer nästa övrig transaktion uppfylla samma krav.
-        
-        // Vi bör ignorera dessa unika transaktioner om
-        // 1. Vi har ett ISIN men det är nytt
-        // 2. Transaktionen innehåller endast Quantity
-        // 3. Beskrivningen innehåller "BTA".
         var portfolio = new InvestmentPortfolio(verbose);
-        var sum = transactions.Sum(t => t.Amount);
+        var seenISINs = new HashSet<string>();
+        var seenAssets = new HashSet<string>();
         foreach (var transaction in ordered)
         {
             switch (transaction.TransactionType)
@@ -40,6 +32,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.Buy:
+                    portfolio.AddTradedAsset(transaction.AssetNameOrDescription);
                     portfolio.AddBuy(transaction);
                     break;
                 case TransactionType.Sell:
@@ -61,24 +54,24 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddDividend(transaction);
                     break;
                 case TransactionType.AssetTransfer:
-                    if (ContainsISIN(transaction))
+                    if (transaction.ContainsISIN())
                     {
                         // Kan vara överföring mellan egna konton
                         // särskild utdelningsförförande
                         // ombokning
-                         
                         switch (transaction.Quantity)
                         {
                             case > 0:
-                                portfolio.AddBuy(transaction);
-                                continue;
+                                portfolio.AddAsset(transaction);
+                                break;
                             case < 0:
-                                portfolio.AddSell(transaction, TransactionType.AssetTransfer);
-                                continue;
+                                portfolio.RemoveAsset(transaction);
+                                break;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                continue;
+                                break;
                         }
+                        break;
                     }
 
                     // Avgift, avkastningsskatt, riskpremie, överföring ränta kapitalmedelskonto,
@@ -89,25 +82,30 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.Other:
-                    if (ContainsISIN(transaction))
+                    if (transaction.ContainsISIN())
                     {
-                        // Kan vara täckningsrätter (TR), betald tecknad aktie (BTA),
-                        // aktiesplit, specialutdelning, tilldelning eller inlösen (IL) 
+                        // För betald tecknad aktie (BTA) skapas ibland en transaktionsdublett av avanza, så kallad inbokning. Denna kan ignoreras:
+                        // 1. Vi har ett ISIN men det är nytt
+                        // 2. Transaktionen innehåller endast Quantity
+                        // 3. Beskrivningen innehåller "BTA".
+                        if (transaction.IsBTA() && transaction.ContainsOnlyQuantity() && !seenISINs.Contains(transaction.ISIN)) break;
+                        
+                        // Kan vara täckningsrätter (TR), aktiesplit, specialutdelning, tilldelning eller inlösen (IL) 
                         switch (transaction.Quantity)
                         {
                             case > 0:
                                 portfolio.AddBuy(transaction);
-                                continue;
+                                break;
                             case < 0:
                                 portfolio.AddSell(transaction);
-                                continue;
+                                break;
                             default:
                                 portfolio.AddDepositOrWithdrawal(transaction);
-                                continue;
+                                break;
                         }
+                        break;
                     }
                     
-
                     // Avgift, avkastningsskatt, riskpremie, överföring ränta kapitalmedelskonto,
                     // moms, tjänster (ex. K4-/K11-underlag), Nollställning av outnyttjad kredit eller blank beskrivning
                     portfolio.AddDepositOrWithdrawal(transaction);
@@ -115,13 +113,12 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            if (transaction.ContainsISIN()) seenISINs.Add(transaction.ISIN);
         }
 
         return portfolio;
     }
 
-    private bool ContainsISIN(Transaction transaction)
-    {
-        return !string.IsNullOrEmpty(transaction.ISIN);
-    }
+    
 }

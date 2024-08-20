@@ -12,12 +12,21 @@ public class InvestmentPortfolio
     private readonly AccountBalance _accountBalance = new();
     private readonly Dictionary<string, Dividends> _dividends = new();
     private readonly bool _verbose;
+    public HashSet<string> TradedAssets { get; } = new();
 
     public InvestmentPortfolio(bool verbose = false)
     {
         _verbose = verbose;
     }
-    
+
+    public void UpdateBalance(Transaction transaction)
+    {
+        _accountBalance[transaction.AccountName] += transaction.Amount;
+        LogBalance(transaction);
+    }
+
+    public void AddTradedAsset(string assetName) => TradedAssets.Add(assetName);
+
     public void AddBuy(Transaction transaction)
     {
         AddAccountIfNotSeen(transaction.AccountName);
@@ -26,10 +35,9 @@ public class InvestmentPortfolio
         if (existingAsset != null)
         {
             if (_verbose) ExtendedConsole.Write($"Buy {transaction.Quantity.ToString("##")} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):red}");
-            var assetValueAtPurchase = Math.Abs(transaction.Amount - transaction.BrokerageFee) / transaction.Quantity;
             existingAsset.AvgAcquisitionCost = CalculateNewAverageAcquisitionCost(existingAsset, transaction);
             existingAsset.Quantity += transaction.Quantity;
-            existingAsset.MarketValue = assetValueAtPurchase * existingAsset.Quantity;
+            existingAsset.MarketValue = transaction.Price * existingAsset.Quantity;
         }
         else
         {
@@ -53,15 +61,52 @@ public class InvestmentPortfolio
         UpdateBalance(transaction);
     }
 
-    public void UpdateBalance(Transaction transaction)
+    public void AddAsset(Transaction transaction)
     {
-        _accountBalance[transaction.AccountName] += transaction.Amount;
-        LogBalance(transaction);
+        AddAccountIfNotSeen(transaction.AccountName);
+        var existingAsset = GetExistingAssetOrDefault(transaction);
+        if (existingAsset != null)
+        {
+            if (_verbose) ExtendedConsole.Write($"Add {transaction.Quantity.ToString("##"):white} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):red}");
+            existingAsset.AvgAcquisitionCost = CalculateNewAverageAcquisitionCost(existingAsset, transaction);
+            existingAsset.Quantity += transaction.Quantity;
+            existingAsset.MarketValue = transaction.Price * existingAsset.Quantity;
+        }
+        else
+        {
+            if (_verbose) ExtendedConsole.Write($"Add {transaction.Quantity.ToString("##"):white} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):red}");
+            // Can't tell by the transaction what type of asset was added
+            var newAsset = new Investment
+            {
+                AccountNumber = transaction.AccountName,
+                ISIN = transaction.ISIN,
+                Currency = transaction.Currency,
+                Type = AssetType.UnknownAsset,
+                Name = transaction.AssetNameOrDescription,
+                Quantity = transaction.Quantity,
+                MarketValue = transaction.Quantity * transaction.Price,
+                AvgAcquisitionCost = transaction.Quantity * transaction.Price,
+            };
+            _accountHoldings[transaction.AccountName].Add(newAsset);
+        }
+        UpdateBalance(transaction);
     }
 
-    public void AddAsset()
+    public void RemoveAsset(Transaction transaction)
     {
-        // TODO ignore BTA
+        AddAccountIfNotSeen(transaction.AccountName);
+        var existingAsset = GetExistingAssetOrDefault(transaction);
+        if (_verbose) ExtendedConsole.Write($"Remove {transaction.Quantity.ToString("##"):white} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):green}");
+
+        UpdateBalance(transaction);
+        if (existingAsset is null) return;
+
+        existingAsset.Quantity += transaction.Quantity;
+
+        if (existingAsset.Quantity == 0)
+        {
+            _accountHoldings[transaction.AccountName].Remove(existingAsset);
+        }
     }
 
     private static decimal CalculateNewAverageAcquisitionCost(Asset existingAsset, Transaction transaction)
@@ -73,12 +118,11 @@ public class InvestmentPortfolio
     }
 
 
-    public void AddSell(Transaction transaction, TransactionType transactionType = TransactionType.Sell)
+    public void AddSell(Transaction transaction)
     {
-        if (!_accountHoldings.ContainsKey(transaction.AccountName)) return;
+        AddAccountIfNotSeen(transaction.AccountName);
 
-        var existingAsset = _accountHoldings[transaction.AccountName]
-            .FirstOrDefault(a => a.ISIN == transaction.ISIN);
+        var existingAsset = GetExistingAssetOrDefault(transaction);
         if (_verbose) ExtendedConsole.Write($"Sell {transaction.Quantity.ToString("##")} {transaction.AssetNameOrDescription:yellow} for {transaction.Amount.ToString("C"):green}");
 
         UpdateBalance(transaction);
@@ -90,22 +134,13 @@ public class InvestmentPortfolio
         {
             _accountHoldings[transaction.AccountName].Remove(existingAsset);
         }
-
-        if (transaction.Amount is decimal.Zero || transactionType is TransactionType.AssetTransfer)
-        {
-            var valueOfTrade = transaction.Quantity * transaction.Price;
-            //_accountBalance[transaction.AccountName] += valueOfTrade;
-        }
     }
+    
 
     private void LogBalance(Transaction transaction)
     {
-        if (_verbose)
-        {
-            //ExtendedConsole.Write($"\t\t | Account balance {transaction.AccountName:yellow}: {_accountBalance[transaction.AccountName].ToString("C"):green} \n");
-            ExtendedConsole.Write($"\n{$"{" > Account balance",18}"} {$"{transaction.AccountName,38}":white}: {$"{_accountBalance[transaction.AccountName],14:C}":green} \n");
-        }
-            
+        if (!_verbose) return;
+        ExtendedConsole.Write($"\n{$"{" > Account balance",18}"} {$"{transaction.AccountName,38}":white}: {$"{_accountBalance[transaction.AccountName],14:C}":green} \n");
     }
 
     public void AddDepositOrWithdrawal(Transaction transaction)
@@ -123,34 +158,14 @@ public class InvestmentPortfolio
 
     public void AddDividend(Transaction transaction)
     {
-        switch(transaction.TransactionType)
+        _dividends[transaction.AccountName].Add(transaction);
+        if (_verbose)
         {
-            case TransactionType.Dividend:
-                _dividends[transaction.AccountName].AddDividend(transaction.Date, transaction.Amount);
-                    break;
-            case TransactionType.ForeignTax:
-                _dividends[transaction.AccountName].AddForeignTax(transaction.Date, transaction.Amount);
-                break;
-            case TransactionType.DividendProvisionalTax:
-                _dividends[transaction.AccountName].AddProvisionalTax(transaction.Date, transaction.Amount);
-                break;
-            case TransactionType.Undefined:
-            case TransactionType.Options:
-            case TransactionType.Deposit:
-            case TransactionType.Withdraw:
-            case TransactionType.Buy:
-            case TransactionType.Sell:
-            case TransactionType.Interest:
-            case TransactionType.ProvisionalTax:
-            case TransactionType.AssetTransfer:
-            case TransactionType.ShareLoanDisbursement:
-            case TransactionType.Other:
-            default: ExtendedConsole.WriteLine($"{"Unexpected dividend type, ignored":red}");
-                break;
-        };
-        _accountBalance[transaction.AccountName ] += transaction.Amount;
-        if (_verbose) ExtendedConsole.Write($"Dividend {transaction.Amount.ToString("C"):green}");
-        LogBalance(transaction);
+            ExtendedConsole.Write(transaction.Amount > 0
+                ? (ConsoleInterpolatedStringHandler)$"Dividend {transaction.Amount.ToString("C"):green}"
+                : (ConsoleInterpolatedStringHandler)$"Dividend tax {transaction.Amount.ToString("C"):red}");
+        }
+        UpdateBalance(transaction);
     }
     private void AddAccountIfNotSeen(string accountName)
     {
@@ -193,54 +208,6 @@ public class AccountBalance
         {
             sb.Append($"{kvp.Key}: {kvp.Value:C} \n");
         }
-        return sb.ToString();
-    }
-}
-
-public class Dividends
-{
-    private readonly Dictionary<DateTime, decimal> _dividends = new();
-    private readonly Dictionary<DateTime, decimal> _provisionalTax = new();
-    private readonly Dictionary<DateTime, decimal> _foreignTax = new();
-
-    public void AddDividend(DateTime date, decimal amount) => this[date] = amount;
-
-    public void AddProvisionalTax(DateTime date, decimal amount)
-    {
-        if (!_provisionalTax.ContainsKey(date)) _provisionalTax.Add(date, amount);
-        else _provisionalTax[date] += amount;
-    }
-
-    public void AddForeignTax(DateTime date, decimal amount)
-    {
-        if (!_foreignTax.ContainsKey(date)) _foreignTax.Add(date, amount);
-        else _foreignTax[date] += amount;
-    }
-
-    public decimal this[DateTime date]
-    {
-        get => _dividends.ContainsKey(date) ? _dividends[date] : 0;
-        set
-        {
-            if (_dividends.ContainsKey(date)) _dividends[date] += value;
-            else
-            {
-                _dividends.Add(date, value);
-            }
-        }
-    }
-
-    public decimal TotalDividends => _dividends.Sum(kvp => kvp.Value);
-    public decimal TotalProvisionalTax => _provisionalTax.Sum(kvp => kvp.Value);
-    public decimal TotalForeignTax => _foreignTax.Sum(kvp => kvp.Value);
-
-    public override string ToString()
-    {
-        if (TotalDividends == decimal.Zero) return "No dividends";
-        var sb = new StringBuilder();
-        sb.Append("Total dividends: ").Append(TotalDividends.ToString("C"));
-        sb.Append(", Tax: ").Append(TotalProvisionalTax.ToString("C"));
-        sb.Append(", Foreign tax: ").Append(TotalForeignTax.ToString("C"));
         return sb.ToString();
     }
 }
