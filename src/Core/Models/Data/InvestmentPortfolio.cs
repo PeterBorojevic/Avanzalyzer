@@ -2,6 +2,7 @@
 using Core.Common.Enums;
 using Core.Models.Securities;
 using Core.Models.Securities.Base;
+using System.Linq;
 using System.Text;
 
 namespace Core.Models.Data;
@@ -10,13 +11,41 @@ public class InvestmentPortfolio
 {
     private readonly Dictionary<string, List<Asset>> _accountHoldings = new();
     private readonly AccountBalance _accountBalance = new();
-    private readonly Dictionary<string, Dividends> _dividends = new();
+    private readonly Dictionary<string, Dividends> _accountDividends = new();
+    //private readonly Dictionary<string, decimal> TODO map ISIN to realised profits
     private readonly bool _verbose;
     public HashSet<string> TradedAssets { get; } = new();
+    public Dictionary<string, string> AssetNameToISIN { get; } = new();
 
     public InvestmentPortfolio(bool verbose = false)
     {
         _verbose = verbose;
+    }
+
+    public Asset? GetAsset(string isin)
+    {
+        return _accountHoldings
+            .Select(accountHolding => accountHolding.Value.FirstOrDefault(asset => asset.ISIN == isin))
+            .FirstOrDefault(holdings => holdings is not null);
+    }
+
+    /// <summary>
+    /// Due to asset transfers, where an asset is removed from one account and then added to another. The asset name becomes "ÖVERFÖRING MELLAN EGNA KONTON".
+    /// But this asset has been seen before, when bought. So the true name exists. This function corrects asset names of such assets using ISIN to match.
+    /// </summary>
+    public void CorrectAssetNames()
+    {
+        var isinToName =
+            AssetNameToISIN.ToDictionary(keySelector: pair => pair.Value, elementSelector: pair => pair.Key);
+        foreach (var accountHolding in _accountHoldings)
+        {
+            foreach (var asset in accountHolding.Value)
+            {
+                var isin = asset.ISIN;
+                if (!isinToName.TryGetValue(isin, out var trueName)) continue;
+                if (trueName != asset.Name) asset.Name = trueName;
+            }
+        }
     }
 
     public void UpdateBalance(Transaction transaction)
@@ -25,7 +54,14 @@ public class InvestmentPortfolio
         LogBalance(transaction);
     }
 
-    public void AddTradedAsset(string assetName) => TradedAssets.Add(assetName);
+    public void AddTradedAsset(Transaction transaction)
+    {
+        TradedAssets.Add(transaction.AssetNameOrDescription);
+        if (!AssetNameToISIN.ContainsKey(transaction.AssetNameOrDescription))
+        {
+            AssetNameToISIN.Add(transaction.AssetNameOrDescription, transaction.ISIN);
+        }
+    }
 
     public void AddBuy(Transaction transaction)
     {
@@ -136,7 +172,6 @@ public class InvestmentPortfolio
         }
     }
     
-
     private void LogBalance(Transaction transaction)
     {
         if (!_verbose) return;
@@ -158,7 +193,7 @@ public class InvestmentPortfolio
 
     public void AddDividend(Transaction transaction)
     {
-        _dividends[transaction.AccountName].Add(transaction);
+        _accountDividends[transaction.AccountName].Add(transaction);
         if (_verbose)
         {
             ExtendedConsole.Write(transaction.Amount > 0
@@ -171,7 +206,7 @@ public class InvestmentPortfolio
     {
         if (!_accountBalance.Contains(accountName)) _accountBalance[accountName] = 0;
         if (!_accountHoldings.ContainsKey(accountName)) _accountHoldings[accountName] = new List<Asset>();
-        if (!_dividends.ContainsKey(accountName)) _dividends[accountName] = new Dividends();
+        if (!_accountDividends.ContainsKey(accountName)) _accountDividends[accountName] = new Dividends();
     }
 
     private Asset? GetExistingAssetOrDefault(Transaction transaction)

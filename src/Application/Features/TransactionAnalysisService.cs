@@ -1,22 +1,24 @@
 ﻿using Core.Common.Enums;
 using Core.Common.Interfaces.Application;
+using Core.Interfaces.Repositories;
 using Core.Models.Data;
 
 namespace Application.Features;
 
 public class TransactionAnalysisService : ITransactionAnalysisService
 {
-    public TransactionAnalysisService()
+    private readonly IAvanzaRepository _avanzaRepository;
+    public TransactionAnalysisService(IAvanzaRepository avanzaRepository)
     {
-        
+        _avanzaRepository = avanzaRepository;
     }
 
-    public InvestmentPortfolio ParseTransactions(IList<Transaction> transactions, bool verbose = false)
+    public InvestmentPortfolio ParseTransactions(IList<Transaction>? transactions = null, bool verbose = false)
     {
+        transactions ??= _avanzaRepository.LoadTransactions();
         var ordered = transactions.Reverse();
         var portfolio = new InvestmentPortfolio(verbose);
         var seenISINs = new HashSet<string>();
-        var seenAssets = new HashSet<string>();
         foreach (var transaction in ordered)
         {
             switch (transaction.TransactionType)
@@ -32,7 +34,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 case TransactionType.Buy:
-                    portfolio.AddTradedAsset(transaction.AssetNameOrDescription);
+                    portfolio.AddTradedAsset(transaction);
                     portfolio.AddBuy(transaction);
                     break;
                 case TransactionType.Sell:
@@ -84,7 +86,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                 case TransactionType.Other:
                     if (transaction.ContainsISIN())
                     {
-                        // För betald tecknad aktie (BTA) skapas ibland en transaktionsdublett av avanza, så kallad inbokning. Denna kan ignoreras:
+                        // För betald tecknad aktie (BTA) skapas ibland en transaktionsdublett av avanza, så kallad inbokning. Denna kan ignoreras och följer mönstret:
                         // 1. Vi har ett ISIN men det är nytt
                         // 2. Transaktionen innehåller endast Quantity
                         // 3. Beskrivningen innehåller "BTA".
@@ -107,7 +109,8 @@ public class TransactionAnalysisService : ITransactionAnalysisService
                     }
                     
                     // Avgift, avkastningsskatt, riskpremie, överföring ränta kapitalmedelskonto,
-                    // moms, tjänster (ex. K4-/K11-underlag), Nollställning av outnyttjad kredit eller blank beskrivning
+                    // Åtebetalning utländsk källskatt, moms,
+                    // tjänster (ex. K4-/K11-underlag), Nollställning av outnyttjad kredit eller blank beskrivning
                     portfolio.AddDepositOrWithdrawal(transaction);
                     break;
                 default:
@@ -116,6 +119,7 @@ public class TransactionAnalysisService : ITransactionAnalysisService
 
             if (transaction.ContainsISIN()) seenISINs.Add(transaction.ISIN);
         }
+        portfolio.CorrectAssetNames();
 
         return portfolio;
     }
