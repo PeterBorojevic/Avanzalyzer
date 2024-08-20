@@ -1,14 +1,11 @@
-﻿using Core.Common.ConsoleTables.v1;
+﻿using Core.Common.ConsoleTables;
+using Core.Common.ConsoleTables.v1;
+using Core.Common.Constants;
 using Core.Common.Enums;
 using Core.Common.Interfaces.Application;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
 using Core.Models.Data;
-using System.Transactions;
-using Core.Common.ConsoleTables;
-using Core.Models;
-using Transaction = Core.Models.Data.Transaction;
-using Core.Common.Constants;
 
 namespace Application.Features;
 
@@ -29,6 +26,9 @@ public class PortfolioAnalyzerService : IPortfolioAnalyzerService
     {
         var transactions = _avanzaRepository.LoadTransactions();
         var portfolio = _transactionAnalysis.ParseTransactions(transactions, verbose: true); // Test
+
+
+
         RoiPerAssetTraded(transactions);
 
         var buyOrSell = transactions
