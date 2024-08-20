@@ -5,11 +5,9 @@ using Core.Common.Interfaces.Application;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
 using Core.Models;
-using Core.Models.Settings;
-
 namespace Console.Menu;
 
-public class AssetsMenu : IAssetMenu
+public class AssetsMenu : Base.Menu, IAssetMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
     private readonly IAvanzaRepository _repository;
@@ -54,7 +52,7 @@ public class AssetsMenu : IAssetMenu
     {
         _analyzer.Get(AnalysisCalculationType.ProfitOrLoss, options => options.UseTransactions = true).PrintToConsole();
         portfolio.Print();
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
 
     private bool ShowAsset(AssetType type, Portfolio portfolio)
@@ -62,23 +60,13 @@ public class AssetsMenu : IAssetMenu
         portfolio.Select(type).PrintProfitOrLoss();
         portfolio.Print(type);
 
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
 
     private bool ReturnOfInvestments()
     {
         _portfolioAnalyzer.LoadTransactions();
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
-
-
-    // ######## Move these to base class ########
-    public bool PressAnyKeyToReturn()
-    {
-        System.Console.WriteLine("\n Click any key to return");
-        ReadKey();
-        return true;
-    }
-    private static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
-    // ##########################################
+    
 }

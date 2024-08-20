@@ -5,7 +5,7 @@ using Core.Common.Interfaces.Application;
 
 namespace Console.Menu;
 
-public class StartMenu : IStartMenu
+public class StartMenu : Base.Menu, IStartMenu
 {
     private readonly IFinancialAnalyzerService _analyzer;
     private readonly IAssetMenu _assetMenu;
@@ -41,20 +41,11 @@ public class StartMenu : IStartMenu
 
     public bool DoNothing() => true;
 
-    public bool PressAnyKeyToReturn()
-    {
-        System.Console.WriteLine("\n Click any key to return");
-        ReadKey();
-        return true;
-    }
-
-    private static ConsoleKeyInfo ReadKey() => System.Console.ReadKey(true);
-
     public bool ShowOverview()
     {
         System.Console.WriteLine("OVERVIEW \n");
         _analyzer.Get(AnalysisCalculationType.AccountTotals).PrintToConsole();
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
 
     public bool ShowAssets()
@@ -69,7 +60,7 @@ public class StartMenu : IStartMenu
         _analyzer.Get(AnalysisCalculationType.DepositsAndWithdrawals).PrintToConsole();
         _analyzer.Get(AnalysisCalculationType.DistributionOfSecurities).PrintToConsole();
 
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
 
     public bool ShowTransactions()
@@ -77,7 +68,7 @@ public class StartMenu : IStartMenu
         System.Console.WriteLine("TRANSACTIONS \n");
 
         System.Console.WriteLine("404 - Work in progress \n");
-        return PressAnyKeyToReturn();
+        return PressAnyKeyToReturn;
     }
 
 }
