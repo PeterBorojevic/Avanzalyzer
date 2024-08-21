@@ -8,6 +8,9 @@ using System.Text;
 namespace Core.Models.Data;
 /* TODO
  * Wouldn't it be nice with some more refined, refactored, clean properties?
+ *
+ * This class is also getting big, a lot of responsibilities.
+ * Can functions be extracted, letting the InvestmentPortfolio only hold data f
  */
 
 public class InvestmentPortfolio
