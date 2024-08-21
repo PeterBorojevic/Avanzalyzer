@@ -17,14 +17,14 @@ public class InvestmentPortfolio
 {
     private readonly Dictionary<string, List<Asset>> _accountHoldings = new();
     private readonly AccountBalance _accountBalance = new();
-    private readonly Dictionary<string, Dividends> _accountDividends = new();
+    private readonly Dictionary<string, Dividends> _accountDividends = new(); // TODO what if we want to fetch a specific assets dividend?
     private readonly bool _verbose;
     public HashSet<string> TradedAssets { get; } = new();
     public Dictionary<string, string> AssetNameToISIN { get; } = new();
     /// <summary>
     /// Maps an assets ISIN to realised profits.
     /// </summary>
-    public Dictionary<string, decimal> AssetProfitOrLosses { get; } = new(); //TODO map ISIN to realised profits
+    public Dictionary<string, decimal> AssetRealisedProfitOrLosses { get; } = new(); //TODO map ISIN to realised profits
 
     public InvestmentPortfolio(bool verbose = false)
     {
@@ -37,6 +37,9 @@ public class InvestmentPortfolio
             .Select(accountHolding => accountHolding.Value.FirstOrDefault(asset => asset.ISIN == isin))
             .FirstOrDefault(holdings => holdings is not null);
     }
+
+    public Dividends GetAccountDividends(string accountName) => _accountDividends.TryGetValue(accountName, out var dividends) ? dividends : new Dividends();
+    public decimal GetAssetDividends(Asset asset) => _accountDividends.TryGetValue(asset.AccountNumber, out var dividends) ? dividends[asset.ISIN] : 0;
 
     /// <summary>
     /// Due to asset transfers, where an asset is removed from one account and then added to another. The asset name becomes "ÖVERFÖRING MELLAN EGNA KONTON".
@@ -172,6 +175,10 @@ public class InvestmentPortfolio
 
         UpdateBalance(transaction);
         if (existingAsset == null) return;
+        var result = transaction.Result ?? CalculateResult(existingAsset, transaction);
+        if (AssetRealisedProfitOrLosses.ContainsKey(existingAsset.ISIN)) AssetRealisedProfitOrLosses[existingAsset.ISIN] += result;
+        else AssetRealisedProfitOrLosses.Add(existingAsset.ISIN, result);
+        
 
         existingAsset.Quantity += transaction.Quantity;
 
@@ -180,7 +187,18 @@ public class InvestmentPortfolio
             _accountHoldings[transaction.AccountName].Remove(existingAsset);
         }
     }
-    
+
+    private static decimal CalculateResult(Asset existingAsset, Transaction transaction)
+    {
+        var averageAcquisitionCost = Math.Abs(existingAsset.AvgAcquisitionCost);
+
+        var sellPrice = transaction.Amount; // Realised gain, positive if sold
+        var assetsSold = Math.Abs(transaction.Quantity); // negative if sold
+        var result = sellPrice / assetsSold - averageAcquisitionCost;
+
+        return result;
+    }
+
     private void LogBalance(Transaction transaction)
     {
         if (!_verbose) return;

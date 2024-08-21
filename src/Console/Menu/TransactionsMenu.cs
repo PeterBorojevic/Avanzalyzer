@@ -3,12 +3,13 @@ using Console.Models;
 using Core.Common.ConsoleTables;
 using Core.Common.ConsoleTables.v1;
 using Core.Common.Interfaces.Application;
-using Core.Extensions;
 using Core.Models.Data;
 using Core.Models.Securities.Base;
 
 namespace Console.Menu;
-
+/*
+ * What do you think about this service? is it just a menu?
+ */
 public class TransactionsMenu : Base.Menu, ITransactionsMenu
 {
     private readonly ITransactionAnalysisService _transactionAnalysisService;
@@ -87,6 +88,18 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
 
     private bool PrintAsset(InvestmentPortfolio portfolio, string assetName)
     {
+
+        ExtendedConsole.WriteLine($"\nYou have selected {assetName:cyan}");
+        var isin = portfolio.AssetNameToISIN[assetName];
+        var asset = portfolio.GetAsset(isin);
+        if (asset is null) return false;
+        Print(asset, portfolio);
+
+        return false;
+    }
+
+    private void Print(Asset asset, InvestmentPortfolio portfolio)
+    {
         // TODO
         // Beräkna ROI
         // Antal trades
@@ -94,23 +107,13 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
         // GAV
         // Marknadsvärde
         // Antal aktier/andelar eller om såld
-        
+
         // - Nedlagda kostnader
         // + Intäkter vid försäljning
         // + Utdelningar
         //(+)Marknadsvärde
         // = Profit or loss
-
-        ExtendedConsole.WriteLine($"\nYou have selected {assetName:cyan}");
-        var isin = portfolio.AssetNameToISIN[assetName];
-        var asset = portfolio.GetAsset(isin);
-        asset?.PrintProfitOrLoss();
-
-        return false;
-    }
-
-    private void Print(Asset asset, InvestmentPortfolio portfolio)
-    {
+        
         // Header and color setup
         var columnInColors = new List<ColumnInColor>()
         {
@@ -119,22 +122,24 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
                 .And(ColorFunctions.ValuesBelow(100, ConsoleColor.DarkBlue))),
             new("Sedan köp [kr]", ConsoleColorFunctions.PositiveOrNegative),
             new("Sedan köp [%]", ConsoleColorFunctions.Percentage),
-            new("Nedlagda kostnader", cell => ConsoleColor.Red),
+            new("Konto", cell => ConsoleColor.White),
             new("Utdelningar", cell => ConsoleColor.Green),
             new("Realiserad vinst", ConsoleColorFunctions.PositiveOrNegative),
             new("Marknadsvärde", cell => ConsoleColor.Red),
         };
         var table = new ConsoleTable(columnInColors);
         // Add each value
+        var accountName = asset.AccountNumber;
+        var dividends = portfolio.GetAssetDividends(asset);
 
         table.AddRow(
             $"{asset.Name}",
             $"{asset.Quantity:##}",
             $"{asset.ProfitOrLoss:##}",
             $"{asset.PercentageChange:P}", // TODO
-            $"{asset.PercentageChange:P}",
-            $"{asset.PercentageChange:P}",
-            $"{asset.PercentageChange:P}",
+            $"{asset.AccountNumber}",
+            $"{portfolio.GetAssetDividends(asset):##}",
+            $"{portfolio.AssetRealisedProfitOrLosses[asset.ISIN]}",
             $"{asset.MarketValue:##}"
         );
 
