@@ -12,9 +12,11 @@ namespace Console.Menu;
 public class TransactionsMenu : Base.Menu, ITransactionsMenu
 {
     private readonly ITransactionAnalysisService _transactionAnalysisService;
-    public TransactionsMenu(ITransactionAnalysisService transactionAnalysisService)
+    private readonly IInvestmentPortfolioCreator _investmentPortfolio;
+    public TransactionsMenu(ITransactionAnalysisService transactionAnalysisService, IInvestmentPortfolioCreator investmentPortfolio)
     {
         _transactionAnalysisService = transactionAnalysisService;
+        _investmentPortfolio = investmentPortfolio;
     }
 
     public UserAction Next()
@@ -24,7 +26,7 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
 
     public bool Run()
     {
-        var portfolio = _transactionAnalysisService.ParseTransactions();
+        var portfolio = _investmentPortfolio.Create();
         var shouldContinue = true;
         while (shouldContinue)
         {
@@ -85,7 +87,7 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
 
     private bool PrintAsset(InvestmentPortfolio portfolio, string assetName)
     {
-        // TODO 
+        // TODO
         // Beräkna ROI
         // Antal trades
         // Courtage
@@ -129,10 +131,11 @@ public class TransactionsMenu : Base.Menu, ITransactionsMenu
             $"{asset.Name}",
             $"{asset.Quantity:##}",
             $"{asset.ProfitOrLoss:##}",
+            $"{asset.PercentageChange:P}", // TODO
             $"{asset.PercentageChange:P}",
             $"{asset.PercentageChange:P}",
             $"{asset.PercentageChange:P}",
-            $"{asset.PercentageChange:P}"
+            $"{asset.MarketValue:##}"
         );
 
         // Print

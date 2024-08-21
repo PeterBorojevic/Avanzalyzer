@@ -15,19 +15,18 @@ namespace Application.Features;
 public class PortfolioAnalyzerService : IPortfolioAnalyzerService
 {
     private readonly IAvanzaRepository _avanzaRepository;
-    private readonly ITransactionAnalysisService _transactionAnalysis;
-    public PortfolioAnalyzerService(IAvanzaRepository avanzaRepository, ITransactionAnalysisService transactionAnalysis)
+    private readonly IInvestmentPortfolioCreator _investmentPortfolio;
+    public PortfolioAnalyzerService(IAvanzaRepository avanzaRepository, IInvestmentPortfolioCreator investmentPortfolio)
     {
         _avanzaRepository = avanzaRepository;
-        _transactionAnalysis = transactionAnalysis;
+        _investmentPortfolio = investmentPortfolio;
     }
 
     public void LoadTransactions()
     {
         var transactions = _avanzaRepository.LoadTransactions();
-        var portfolio = _transactionAnalysis.ParseTransactions(transactions, verbose: true); // Test
-
-
+        var investmentPortfolio = _investmentPortfolio.Create(transactions, verbose: false);
+        // TODO use investmentPortfolio instead of transactions
 
         RoiPerAssetTraded(transactions);
 

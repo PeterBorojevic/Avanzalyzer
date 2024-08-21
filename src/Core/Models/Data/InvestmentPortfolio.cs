@@ -6,16 +6,22 @@ using System.Linq;
 using System.Text;
 
 namespace Core.Models.Data;
+/* TODO
+ * Wouldn't it be nice with some more refined, refactored, clean properties?
+ */
 
 public class InvestmentPortfolio
 {
     private readonly Dictionary<string, List<Asset>> _accountHoldings = new();
     private readonly AccountBalance _accountBalance = new();
     private readonly Dictionary<string, Dividends> _accountDividends = new();
-    //private readonly Dictionary<string, decimal> TODO map ISIN to realised profits
     private readonly bool _verbose;
     public HashSet<string> TradedAssets { get; } = new();
     public Dictionary<string, string> AssetNameToISIN { get; } = new();
+    /// <summary>
+    /// Maps an assets ISIN to realised profits.
+    /// </summary>
+    public Dictionary<string, decimal> AssetProfitOrLosses { get; } = new(); //TODO map ISIN to realised profits
 
     public InvestmentPortfolio(bool verbose = false)
     {

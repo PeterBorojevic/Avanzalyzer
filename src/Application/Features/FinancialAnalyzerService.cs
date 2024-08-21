@@ -27,7 +27,7 @@ public class FinancialAnalyzerService : IFinancialAnalyzerService
             AnalysisCalculationType.DepositsAndWithdrawals => GetDepositsAndWithdrawals(),
             AnalysisCalculationType.AccountTotals => GetAccountTotals(),
             AnalysisCalculationType.DistributionOfSecurities => GetDistributionOfSecurities(),
-            AnalysisCalculationType.SectoralBreakdown => throw new NotImplementedException(),
+            AnalysisCalculationType.SectoralBreakdown => throw new NotImplementedException(), // Need external information
             AnalysisCalculationType.ProfitOrLoss => GetProfitOrLoss(portfolio, transactions),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };

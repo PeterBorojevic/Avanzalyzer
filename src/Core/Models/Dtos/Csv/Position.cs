@@ -4,7 +4,9 @@ using Core.Models.Securities.Base;
 using CsvHelper.Configuration.Attributes;
 
 namespace Core.Models.Dtos.Csv;
-
+/* TODO
+ * This class is used by the infrastructure layer as well by application. Could we separate infrastructure models and internal ones?
+ */
 public class Position
 {
     /// <summary>

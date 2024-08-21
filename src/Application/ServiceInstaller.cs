@@ -11,6 +11,7 @@ public static class ServiceInstaller
         services.AddTransient<IFinancialAnalyzerService, FinancialAnalyzerService>();
         services.AddTransient<IPortfolioAnalyzerService, PortfolioAnalyzerService>();
         services.AddTransient<ITransactionAnalysisService, TransactionAnalysisService>();
+        services.AddSingleton<IInvestmentPortfolioCreator, InvestmentPortfolioCreator>();
 
         return services;
     }
